@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     window.allData = [
-        {   id: 1, 
+ {   id: 1, 
             title: "LCMS35M413", 
             type:  "이미지",
             team: "WEB팀",
@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\웹디자인\\ai 생성 이미지\\LCMS35M413",
             usage: "착화컷",
             usedIn: "자사몰 특가세일 착화 이미지", 
-            reaction: "얼굴 사용 가능, 가급적 착화컷 위주 사용(레퍼런스 배경과 비슷한 이슈로 주의)", 
+            reaction: "얼굴 사용 가능, 착화컷 위주 사용(레퍼런스 배경과 비슷한 이슈로 주의)", 
             prompt: "1번 이미지 속 모델 얼굴을 2번 이미지 얼굴로 바꿔주고, 옷은 3번으로 입혀줘. 신발은 4번 누끼컷 참고해서 변경해줘. 화질은 4K로 주고 사진 비율은 1:1로 생성해줘.", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMS35M413.jpg", 
             subImage: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMS35M413_detail1.jpg", 
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
             subImage: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWD94I126_detail.jpg", 
         },
         {   id: 5, 
-            title: "선물관", 
+            title: "2026 선물관", 
             type:  "영상",
             team: "WEB팀",
             brand: "ELCANTO", 
@@ -526,7 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613.jpg", 
         },
@@ -780,7 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613_2.jpg", 
         },
@@ -798,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613_3.jpg", 
         },
@@ -816,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613_4.jpg", 
         },
@@ -834,7 +834,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613_5.jpg", 
         },
@@ -852,7 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613_6.jpg", 
         },
@@ -870,7 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613_7.jpg", 
         },
@@ -888,7 +888,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link: "\\\\172.30.235.50\\web팀\\AI생성_기획전\\260105_무신사_단독상품\\★최종",
             usage: "기획전",
             usedIn: "무신사 단독상품 AI 요청(메인 배너, 룩북 등 활용)", 
-            reaction: "웹팀+온라인팀 담당 MD 협업", 
+            reaction: "웹팀+담당 MD+무신사 협업", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD29I613_9.jpg", 
         },
@@ -907,9 +907,24 @@ document.addEventListener("DOMContentLoaded", () => {
             usage: "기획전",
             usedIn: "2026 자사몰 상반기 결산", 
             reaction: "", 
-            prompt: "", 
+            prompt: `
+1. 레퍼런스
+2. 시원한 여름바다와 푸른 하늘에서 시작. 투명한 트로피 이미지가 투영된 야외에서 자연스럽게 떠있는 모습 연출.
+3. 바다는 없애고 푸른 하늘 배경에서 트로피의 그림과 문구는 삭제하고 양쪽에 손잡이가 있는 반짝반짝 빛나는 트로피로 변형.
+4. 좀 더 맑은 구름의 시원한 느낌의 배경으로 하늘에서 트로피가 빛을 받으며 움직이는 모습을 영상으로 만들어줘.
+5. 선물상자 추가이미지 생성 후 → 이 이미지 그대로 트로피와 선물상자가 하늘에 가볍게 떠있는 모습과 배경이 자연스럽게 어우러지게 영상으로 만들어줘.
+6. 첫 화면에서부터 투명 트로피가 메인이 되도록 연출.
+7. <최종 활용> 사물이 클로즈업 되지 않고 멀어지면서 이동하게 영상을 10초짜리로 제작 후 하단부에 구름들만 지워주고 청량하게 멀리 퍼지는 하늘만 보여줘.`,
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards.jpg", 
-            subImage: "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_detail.jpg", 
+            subImages: [
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom1.jpg",
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom2.jpg",
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom3.jpg",
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom4.jpg",
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom5.jpg",
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom6.jpg",
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom7.jpg"
+            ]
         },
     ];
 
@@ -927,6 +942,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 });
+
 
 function renderCards(data){
     const gallery = document.getElementById('gallery');
@@ -1008,7 +1024,6 @@ function resetFilters(){
     document.getElementById('detailPanel').innerHTML = `<div class="empty-panel"></div>`;
 }
 
-
 function updateDetailPanel(id){
     const item = window.allData.find(v => v.id === id);
     if(!item) return;
@@ -1025,11 +1040,36 @@ function updateDetailPanel(id){
                 <div class="image-wrap">
                     <img src="${item.image}" class="main-image">
 
-                    ${item.subImage ? `
-                        <div class="sub-image-wrap">
-                            <img src="${item.subImage}" alt="sub-image" style="width: 100% !important; height: auto !important; aspect-ratio: auto !important; object-fit: contain !important; border-radius: 12px;">
+                    ${(() => {
+                        let imgList = [];
+                        if (item.subImages && Array.isArray(item.subImages)) {
+                            imgList = item.subImages;
+                        } else if (item.subImage) {
+                            imgList = [item.subImage];
+                        }
+
+                        if (imgList.length === 0) return '';
+
+                        return `
+                        <div class="sub-image-container" id="subImageContainer">
+                            <div class="sub-image-wrapper" id="subSliderWrapper" style="width: ${imgList.length * 100}%;">
+                                ${imgList.map(src => `
+                                    <div class="sub-slide-item" style="width: ${100 / imgList.length}%;">
+                                        <img src="${src}" alt="sub-image" draggable="false">
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            ${imgList.length > 1 ? `
+                            <div class="sub-slider-bullets" id="subSliderBullets">
+                                ${imgList.map((_, idx) => `
+                                    <span class="sub-bullet ${idx === 0 ? 'active' : ''}" onclick="moveSubSlide(${idx})"></span>
+                                `).join('')}
+                            </div>
+                            ` : ''}
                         </div>
-                    ` : ''}
+                        `;
+                    })()}
                 </div>
             </div>
             <div class="panel-right">
@@ -1052,13 +1092,86 @@ function updateDetailPanel(id){
                 
                 <div class="prompt-box">
                     <h3>Prompt</h3>
-                    <textarea readonly id="promptText">${item.prompt}</textarea>
+                    <textarea readonly id="promptText">${item.prompt || ''}</textarea>
                     <button class="copy-btn" onclick="copyPrompt()">프롬프트 복사</button>
                 </div>
             </div>
         </div>
     `;
+
+    initSubSlider();
 }
+
+window.currentSubIndex = 0;
+
+
+function moveSubSlide(index) {
+    const wrapper = document.getElementById('subSliderWrapper');
+    const bullets = document.querySelectorAll('#subSliderBullets .sub-bullet');
+    if (!wrapper) return;
+
+    window.currentSubIndex = index;
+    const totalSlides = bullets.length || 1;
+    const moveX = index * (100 / totalSlides);
+
+    wrapper.style.transition = "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
+    wrapper.style.transform = `translateX(-${moveX}%)`;
+
+    bullets.forEach((bullet, idx) => {
+        if (idx === index) bullet.classList.add('active');
+        else bullet.classList.remove('active');
+    });
+}
+
+function initSubSlider() {
+    const container = document.getElementById('subImageContainer');
+    const wrapper = document.getElementById('subSliderWrapper');
+    const bullets = document.querySelectorAll('#subSliderBullets .sub-bullet');
+    if (!container || !wrapper || bullets.length <= 1) return;
+
+    let isDragging = false;
+    let startX = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+
+    container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        wrapper.style.transition = 'none'; 
+
+        const totalSlides = bullets.length;
+        prevTranslate = -window.currentSubIndex * (container.offsetWidth);
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const currentX = e.clientX;
+        const dragDistance = currentX - startX;
+        currentTranslate = prevTranslate + dragDistance;
+        wrapper.style.transform = `translateX(${currentTranslate}px)`;
+    });
+
+    const handleMouseUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const movedBy = e.clientX - startX;
+        const triggerDistance = container.offsetWidth * 0.2; 
+
+        if (movedBy < -triggerDistance && window.currentSubIndex < bullets.length - 1) {
+            window.currentSubIndex += 1; 
+        } else if (movedBy > triggerDistance && window.currentSubIndex > 0) {
+            window.currentSubIndex -= 1; 
+        }
+
+        moveSubSlide(window.currentSubIndex);
+    };
+
+    container.addEventListener('mouseup', handleMouseUp);
+    container.addEventListener('mouseleave', handleMouseUp);
+}
+
+
 
 function showEmptyPanel() {
     document.getElementById('detailPanel').innerHTML = `
@@ -1071,3 +1184,22 @@ function copyPrompt(){
     navigator.clipboard.writeText(text);
     alert('프롬프트가 클립보드에 복사되었습니다.');
 }
+
+setTimeout(() => {
+    const slider = document.querySelector('.sub-slides');
+    const dots = document.querySelectorAll('.sub-dots .dot');
+
+    if(!slider) return;
+
+    slider.addEventListener('scroll', () => {
+        const index = Math.round(slider.scrollLeft / slider.clientWidth);
+
+        dots.forEach(dot => dot.classList.remove('active'));
+
+        if(dots[index]){
+            dots[index].classList.add('active');
+        }
+    });
+},0);
+
+
