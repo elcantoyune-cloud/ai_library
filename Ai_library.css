@@ -1,30 +1,29 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
-    font-family:Pretendard,sans-serif;
-    background:#fff;
-    color:#111;
-    overflow:hidden;
-    obevflow-y:auto;
-    margin:0;
+body {
+    font-family: Pretendard, sans-serif;
+    background: #fff;
+    color: #111;
+    margin: 0;
+    /* 🚨 웹브라우저 창 자체가 통째로 가로로 찢어지거나 튕기는 현상 방지 */
+    overflow-x: hidden; 
 }
-
 
 .main-wrapper {
     display: flex;
     max-width: 1600px;
-    width: 100%;
-    height: 100%;
-    overflow: visible;       /* 🚨 hidden에서 visible로 변경하여 가로 차단 해제 */
+    width: 100vw;  /* 🚨 100%에서 100vw로 변경해 화면 크기 강제 고정 */
+    height: 100vh; /* 🚨 100%에서 100vh로 변경해 화면 높이 강제 고정 */
+    overflow: hidden; 
 }
 
 /* 왼쪽 메뉴 영역 */
-.container{
-    width: 32%;
+.container {
+    width: 30%;
     min-width: 450px;
     flex-shrink: 0;
     height: 100%;
@@ -39,133 +38,132 @@ body{
     display: none; 
 }
 
-.header{
-    margin-bottom:30px;
+.header {
+    margin-bottom: 30px;
 }
 
-.header h1{
-    font-size:28px;
-    font-weight:700;
+.header h1 {
+    font-size: 28px;
+    font-weight: 700;
     letter-spacing: -0.5px;
 }
 
-.search-wrap{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
+.search-wrap {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.search-wrap input{
-    flex:1;
-    height:52px;
-    padding:0 18px;
-    border:1px solid #ddd;
-    border-radius:12px;
+.search-wrap input {
+    flex: 1;
+    height: 52px;
+    padding: 0 18px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
     font-size: 14px;
     min-width: 0;
 }
 
-.search-wrap button{
-    height:52px;
-    padding:0 20px;
-    border:0;
-    border-radius:12px;
-    cursor:pointer;
-    font-weight: semi-bold;
+.search-wrap button {
+    height: 52px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
     white-space: nowrap; 
     flex-shrink: 0;
 }
 
-.search-btn{
-    background:#111;
-    color:#fff;
+.search-btn {
+    background: #111;
+    color: #fff;
 }
 
-.reset-btn{
-    background:#fff;
+.reset-btn {
+    background: #fff;
     border: 1px solid #ddd !important;
 }
 
-.filter-area{
-    display:grid;
+.filter-area {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap:12px;
-    margin-bottom:25px;
+    gap: 12px;
+    margin-bottom: 25px;
 }
 
-.filter-area select{
-    height:48px;
-    border:1px solid #ddd;
-    border-radius:10px;
-    padding:0 12px;
-    background:#fff;
+.filter-area select {
+    height: 48px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 0 12px;
+    background: #fff;
     font-size: 13.5px;
     width: 100%;
-    
 }
 
-.result-count{
-    margin-bottom:20px;
+.result-count {
+    margin-bottom: 20px;
     font-weight: 600;
-    color:#111;
+    color: #111;
     display: none; 
 }
 
-.gallery{
-    display:grid;
+.gallery {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap:10px;
+    gap: 10px;
     display: none; 
 }
 
-.card{
-    background:#fff;
-    border-radius:16px;
-    overflow:hidden;
-    cursor:pointer;
-    transition:.25s;
+.card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: .25s;
     border: 1px solid #eee;
 }
 
-.card:hover{
-    transform:translateY(-4px);
+.card:hover {
+    transform: translateY(-4px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.04);
 }
 
-.card img{
-    width:100%;
+.card img {
+    width: 100%;
     aspect-ratio: 1;
-    object-fit:cover;
+    object-fit: cover;
 }
 
-.card-body{
-    padding:16px;
+.card-body {
+    padding: 16px;
 }
 
-.card-title{
-    font-size:15px;
-    font-weight:700;
-    margin-bottom:8px;
+.card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
-.card-product{
-    font-size:13px;
-    color:#888;
+.card-product {
+    font-size: 13px;
+    color: #888;
     line-height: 1.5;
-    margin-bottom:12px;
+    margin-bottom: 12px;
 }
 
-.card-tags{
-    display:flex;
-    flex-wrap:wrap;
-    gap:6px;
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
-.card-tags span{
-    padding:4px 8px;
-    border-radius:4px;
-    background:#f1f3f5;
-    font-size:12px;
+.card-tags span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #f1f3f5;
+    font-size: 12px;
     color: #666;
 }
 
@@ -173,36 +171,35 @@ body{
     flex: 1;
     height: 100%;
     background: #fff;
-    overflow: visible;       /* 🚨 hidden에서 visible로 변경하여 가로 차단 해제 */
+    overflow: hidden; 
 }
 
-.panel-content{
+.panel-content {
     display: flex;
     width: 100%;
-    height: 97.5%;
+    height: 100%; /* 🚨 97.5%에서 100%로 꽉 채워 스크롤 가두기 */
     position: relative;
 }
 
 /* 대형 이미지 영역 */
-.panel-left{
+.panel-left {
     width: 43.5%;
     min-width: 400px;
     flex-shrink: 0;
-    height:100%;
+    height: 100%;
     padding: 40px 20px 40px 40px;
-    display:flex;
-    flex-direction:column;
-    gap:16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     overflow-y: auto;
 }
-
 .panel-left::-webkit-scrollbar { display: none; }
 .panel-left { -ms-overflow-style: none; scrollbar-width: none; }
 
-.panel-left img{
-    width:100%;
+.panel-left img {
+    width: 100%;
     aspect-ratio: 3 / 4; 
-    object-fit:cover;
+    object-fit: cover;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
@@ -214,16 +211,19 @@ body{
     display: flex;
     flex-direction: column;
     height: 100%; 
+    
+    /* 🚨 세로 스크롤은 기본 제공하면서, 긴 텍스트 드래그 시 패널 내부만 가로로 밀리도록 연동 */
     overflow: auto;
+    overflow-x: auto;
     overflow-y: auto; 
+    
     -ms-overflow-style: none;  
     scrollbar-width: none;  
 }
-
-
 .panel-right::-webkit-scrollbar {
-    display: none; 
+    display: none !important; 
 }
+
 .panel-right h2 {
     font-size: 20px;
     font-weight: 700;
@@ -231,17 +231,17 @@ body{
     margin-bottom: 10px;
 }
 
-.sub-image-wrap{
-    width:100%;
+.sub-image-wrap {
+    width: 100%;
 }
 
-.sub-image-wrap img{
-    width:100%;
-    height:auto;
+.sub-image-wrap img {
+    width: 100%;
+    height: auto;
     margin-top: 10px;   
-    object-fit:contain;
-    border-radius:16px;
-    display:block;
+    object-fit: contain;
+    border-radius: 16px;
+    display: block;
 }
 
 .info-table {
@@ -250,12 +250,12 @@ body{
     padding: 10px;
 }
 
-.info-row{
-    display:flex;
-    justify-content:space-between;
+.info-row {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding:11px 0;
-    border-bottom:1px solid #f0f0f0;
+    padding: 11px 0;
+    border-bottom: 1px solid #f0f0f0;
     font-size: 14px;
     gap: 20px;
 }
@@ -270,7 +270,8 @@ body{
 .info-row span {
     color: #555;
     text-align: right;
-    word-break: break-all; 
+    white-space: nowrap;  /* 🚨 한 줄 고정으로 드래그 축 유지 */
+    word-break: keep-all; 
 }
 
 .info-row.performance {
@@ -300,13 +301,13 @@ body{
     color: #111;
 }
 
-.prompt-box textarea{
-    width:100%;
-    height:120px;
-    padding:14px;
-    border:1px solid #e5e7eb;
-    border-radius:10px;
-    resize:none;
+.prompt-box textarea {
+    width: 100%;
+    height: 120px;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    resize: none;
     font-family: 'Courier New', Courier, monospace;
     font-size: 13px;
     background: #fafafa;
@@ -314,14 +315,14 @@ body{
     line-height: 1.5;
 }
 
-.copy-btn{
-    margin-top:8px;
-    background:#111;
-    color:#fff;
-    padding:12px;
-    border:0;
-    border-radius:8px;
-    cursor:pointer;
+.copy-btn {
+    margin-top: 8px;
+    background: #111;
+    color: #fff;
+    padding: 12px;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
     width: 100%;
     font-weight: 700;
     font-size: 14px;
@@ -342,7 +343,6 @@ body{
     background: #fff;
 }
 
-
 .sub-image-container {
     position: relative;
     width: 100%;
@@ -353,7 +353,6 @@ body{
     margin-top: 15px;
     cursor: grab; 
 }
-
 
 .sub-image-wrapper {
     display: flex;
