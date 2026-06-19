@@ -1,7 +1,8 @@
 {
-  "name": "AI 비주얼 라이브러리",
+  "id": "/ai_library/",
+  "name": "나의 AI 라이브러리 앱",
   "short_name": "AI 라이브러리",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
