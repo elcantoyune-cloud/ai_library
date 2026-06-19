@@ -1256,3 +1256,7 @@ setTimeout(() => {
         const walk = (x - startX) * 1.5; 
         mainWrapper.scrollLeft = scrollLeft - walk;
     });
+
+self.addEventListener('install', () => {
+  console.log('SW installed');
+});
