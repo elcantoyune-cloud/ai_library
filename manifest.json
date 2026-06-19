@@ -1,6 +1,7 @@
 {
   "name": "AI Library",
   "short_name": "AI Library",
+  "description": "An AI Library application.",
   "start_url": "/ai_library/",
   "scope": "/ai_library/",
   "display": "standalone",
