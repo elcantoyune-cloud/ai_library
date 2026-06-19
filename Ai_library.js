@@ -1203,3 +1203,32 @@ setTimeout(() => {
 },0);
 
 
+
+    const mainWrapper = document.getElementById('mainWrapper');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    mainWrapper.addEventListener('pointerdown', (e) => {
+        if(e.target.closest('input') || e.target.closest('select') || e.target.closest('.sub-image-container') || e.target.closest('textarea')) return;
+        
+        isDown = true;
+        mainWrapper.setPointerCapture(e.pointerId);
+        startX = e.clientX;
+        scrollLeft = mainWrapper.scrollLeft;
+    });
+
+    mainWrapper.addEventListener('pointerup', () => {
+        isDown = false;
+    });
+
+    mainWrapper.addEventListener('pointercancel', () => {
+        isDown = false;
+    });
+
+    mainWrapper.addEventListener('pointermove', (e) => {
+        if (!isDown) return;
+        const x = e.clientX;
+        const walk = (x - startX) * 1.5; 
+        mainWrapper.scrollLeft = scrollLeft - walk;
+    });
