@@ -929,18 +929,42 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
 
+// 🌟 [자동 배치 엔진]
+    const seasonOrder = { 'SPRING': 1, 'SUMMER': 2, 'AUTUMN': 3, 'WINTER': 4 };
+
+    window.allData.sort((a, b) => {
+        const [yearA, termA] = a.season ? a.season.split(' ') : [0, ''];
+        const [yearB, termB] = b.season ? b.season.split(' ') : [0, ''];
+
+        // 1순위: 년도
+        if (parseInt(yearA) !== parseInt(yearB)) {
+            return parseInt(yearA) - parseInt(yearB);
+        }
+        // 2순위: 계절
+        if (termA !== termB) {
+            return (seasonOrder[termA] || 0) - (seasonOrder[termB] || 0);
+        }
+        // 3순위: 시즌 품번 알파벳 정렬
+        return (a.title || '').localeCompare(b.title || '');
+    });
+
+
+    window.allData.forEach((item, index) => {
+        item.id = index + 1;
+    });
+
     renderCards(allData);
     document.querySelectorAll('.filter-area select').forEach(select => {
         select.addEventListener('change', applyFilters);
     });
     const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    applyFilters();
-                }
-            });
-        }
+    if (searchInput) {
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                applyFilters();
+            }
+        });
+    }
 });
 
 
