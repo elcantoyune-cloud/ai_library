@@ -929,24 +929,30 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
 
-// 🌟 [자동 배치 엔진]
-    const seasonOrder = { 'SPRING': 1, 'SUMMER': 2, 'AUTUMN': 3, 'WINTER': 4 };
+const seasonOrder = { 'SPRING': 1, 'SUMMER': 2, 'AUTUMN': 3, 'WINTER': 4 };
 
-    window.allData.sort((a, b) => {
-        const [yearA, termA] = a.season ? a.season.split(' ') : [0, ''];
-        const [yearB, termB] = b.season ? b.season.split(' ') : [0, ''];
+window.allData.sort((a, b) => {
+    const [yearA, termA] = a.season ? a.season.split(' ') : [0, ''];
+    const [yearB, termB] = b.season ? b.season.split(' ') : [0, ''];
 
-        // 1순위: 년도
-        if (parseInt(yearA) !== parseInt(yearB)) {
-            return parseInt(yearA) - parseInt(yearB);
-        }
-        // 2순위: 계절
-        if (termA !== termB) {
-            return (seasonOrder[termA] || 0) - (seasonOrder[termB] || 0);
-        }
-        // 3순위: 시즌 품번 알파벳 정렬
-        return (a.title || '').localeCompare(b.title || '');
-    });
+    // 1순위: 년도
+    if (parseInt(yearA) !== parseInt(yearB)) {
+        return parseInt(yearA) - parseInt(yearB);
+    }
+    // 2순위: 계절
+    if (termA !== termB) {
+        return (seasonOrder[termA] || 0) - (seasonOrder[termB] || 0);
+    }
+    // 3순위: 생성일
+    const createdA = new Date(a.created || '1900-01-01');
+    const createdB = new Date(b.created || '1900-01-01');
+
+    if (createdA.getTime() !== createdB.getTime()) {
+        return createdA - createdB; 
+    }
+    // 4순위: 제목
+    return (a.title || '').localeCompare(b.title || '');
+});
 
 
     window.allData.forEach((item, index) => {
@@ -1256,7 +1262,3 @@ setTimeout(() => {
         const walk = (x - startX) * 1.5; 
         mainWrapper.scrollLeft = scrollLeft - walk;
     });
-
-self.addEventListener('install', () => {
-  console.log('SW installed');
-});
