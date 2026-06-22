@@ -926,6 +926,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 "https://gi.esmplus.com/elcanto01/elcanto/ai/first_halt_awards_prom7.jpg"
             ]
         },
+        {   id: 51, 
+            title: "LCWW03I626", 
+            type:  "이미지",
+            team: "WEB팀", 
+            brand: "INTENSE", 
+            gender: "여화", 
+            category: "샌들", 
+            season: "26 SUMMER", 
+           background: "야외", 
+            tool: "Gemini", 
+            created: "2026-06-22", 
+            link: "\\\\172.30.235.50\\web팀\\웹디자인\\ai 생성 이미지\\LCWW03I626",
+            usage: "착화컷",
+            usedIn: "자사몰 72H 타임세일 착화이미지", 
+            reaction: "얼굴 사용 가능, 디테일 정확도 주의(굽높이 등)", 
+            prompt: "1번 이미지에서 스튜디오와 분위기, 2번 이미지 속 인물의 옷 스타일링과 의자를 사용해주고, 3,4번 모델 얼굴로 바꿔줘, 5~8번 신발 누끼컷 참고해서 신발 교체해줘. 포즈는 1번 포즈 그대로 사용해줘. 9번처럼 살짝 빛이 드는 느낌으로 마무리해줘.", 
+            image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW03I626.jpg", 
+            subImage:"https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW03I626_detail.jpg",
+        },
     ];
 
 
