@@ -1171,66 +1171,53 @@ function moveSubSlide(index) {
         else bullet.classList.remove('active');
     });
 }
+
 function initSubSlider() {
     const container = document.getElementById('subImageContainer');
     const wrapper = document.getElementById('subSliderWrapper');
     const bullets = document.querySelectorAll('#subSliderBullets .sub-bullet');
-
     if (!container || !wrapper || bullets.length <= 1) return;
 
-    let startX = 0;
     let isDragging = false;
+    let startX = 0;
+    let currentTranslate = 0;
     let prevTranslate = 0;
 
-    const getX = (e) => {
-        return e.touches ? e.touches[0].clientX : e.clientX;
-    };
-
-    const startDrag = (e) => {
+    container.addEventListener('mousedown', (e) => {
         isDragging = true;
-        startX = getX(e);
-        wrapper.style.transition = 'none';
+        startX = e.clientX;
+        wrapper.style.transition = 'none'; 
 
-        prevTranslate = -window.currentSubIndex * container.offsetWidth;
-    };
+        const totalSlides = bullets.length;
+        prevTranslate = -window.currentSubIndex * (container.offsetWidth);
+    });
 
-    const moveDrag = (e) => {
+    container.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
+        const currentX = e.clientX;
+        const dragDistance = currentX - startX;
+        currentTranslate = prevTranslate + dragDistance;
+        wrapper.style.transform = `translateX(${currentTranslate}px)`;
+    });
 
-        const currentX = getX(e);
-        const diff = currentX - startX;
-
-        wrapper.style.transform = `translateX(${prevTranslate + diff}px)`;
-    };
-
-    const endDrag = (e) => {
+    const handleMouseUp = (e) => {
         if (!isDragging) return;
         isDragging = false;
+        
+        const movedBy = e.clientX - startX;
+        const triggerDistance = container.offsetWidth * 0.2; 
 
-        const endX = getX(e.changedTouches ? e.changedTouches[0] : e);
-        const movedBy = endX - startX;
-
-        const threshold = container.offsetWidth * 0.2;
-
-        if (movedBy < -threshold && window.currentSubIndex < bullets.length - 1) {
-            window.currentSubIndex++;
-        } else if (movedBy > threshold && window.currentSubIndex > 0) {
-            window.currentSubIndex--;
+        if (movedBy < -triggerDistance && window.currentSubIndex < bullets.length - 1) {
+            window.currentSubIndex += 1; 
+        } else if (movedBy > triggerDistance && window.currentSubIndex > 0) {
+            window.currentSubIndex -= 1; 
         }
 
         moveSubSlide(window.currentSubIndex);
     };
 
-    // 👉 마우스
-    container.addEventListener('mousedown', startDrag);
-    container.addEventListener('mousemove', moveDrag);
-    container.addEventListener('mouseup', endDrag);
-    container.addEventListener('mouseleave', endDrag);
-
-    // 👉 터치 (핵심)
-    container.addEventListener('touchstart', startDrag, { passive: true });
-    container.addEventListener('touchmove', moveDrag, { passive: true });
-    container.addEventListener('touchend', endDrag);
+    container.addEventListener('mouseup', handleMouseUp);
+    container.addEventListener('mouseleave', handleMouseUp);
 }
 
 
