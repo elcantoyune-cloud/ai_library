@@ -413,3 +413,103 @@
             background: #0066ff;
             width: 8px;
         }
+
+
+
+@media (max-width: 1024px) and (min-width: 768px) {
+
+    body {
+        overflow: hidden; /* 데스크탑 가로 스크롤 유지 */
+    }
+
+    .main-wrapper {
+        width: 100vw;
+        height: 100vh;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    /* =========================
+       LEFT (container)
+    ========================= */
+    .container {
+        width: 32%;
+        min-width: 360px; /* 기존 450 → 태블릿 최적화 */
+        padding: 12px;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .search-wrap input {
+        height: 46px;
+        font-size: 13px;
+    }
+
+    .search-wrap button {
+        height: 46px;
+        padding: 0 14px;
+        font-size: 13px;
+    }
+
+    .filter-area {
+        grid-template-columns: repeat(2, 1fr); /* 핵심: 2열 유지 */
+        gap: 10px;
+    }
+
+    .filter-area select {
+        height: 44px;
+        font-size: 13px;
+    }
+
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    /* =========================
+       RIGHT (detail panel)
+    ========================= */
+    .detail-panel {
+        min-width: 720px; /* 핵심: 2패널 유지하면서 압축 */
+    }
+
+    .panel-left {
+        width: 42%;
+        min-width: 320px;
+        padding: 24px 16px 24px 24px;
+    }
+
+    .panel-right {
+        min-width: 380px;
+        padding: 16px;
+    }
+
+    .panel-right h2 {
+        font-size: 18px;
+    }
+
+    .info-row {
+        font-size: 13px;
+        padding: 9px 0;
+    }
+
+    .info-row span {
+        max-width: 68%;
+    }
+
+    .sub-image-container {
+        aspect-ratio: 2 / 1; /* 유지 (깨지지 않게) */
+    }
+
+    .prompt-box textarea {
+        height: 110px;
+        font-size: 12.5px;
+    }
+
+    .copy-btn {
+        padding: 10px;
+        font-size: 13px;
+    }
+}
