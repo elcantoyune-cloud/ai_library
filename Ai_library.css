@@ -419,7 +419,7 @@
 @media (max-width: 1024px) and (min-width: 768px) {
 
     body {
-        overflow: hidden; /* 데스크탑 가로 스크롤 유지 */
+        overflow: hidden;
     }
 
     .main-wrapper {
@@ -430,86 +430,111 @@
     }
 
     /* =========================
-       LEFT (container)
+       LEFT (더 압축)
     ========================= */
     .container {
-        width: 32%;
-        min-width: 360px; /* 기존 450 → 태블릿 최적화 */
-        padding: 12px;
+        width: 28%;
+        min-width: 320px; /* 핵심: 확 줄임 */
+        padding: 10px;
+    }
+
+    .header {
+        margin-bottom: 18px;
     }
 
     .header h1 {
-        font-size: 22px;
+        font-size: 20px;
     }
 
     .search-wrap input {
-        height: 46px;
-        font-size: 13px;
+        height: 42px;
+        font-size: 12.5px;
+        padding: 0 12px;
     }
 
     .search-wrap button {
-        height: 46px;
-        padding: 0 14px;
-        font-size: 13px;
+        height: 42px;
+        padding: 0 12px;
+        font-size: 12px;
     }
 
     .filter-area {
-        grid-template-columns: repeat(2, 1fr); /* 핵심: 2열 유지 */
-        gap: 10px;
-    }
-
-    .filter-area select {
-        height: 44px;
-        font-size: 13px;
-    }
-
-    .gallery {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
     }
 
+    .filter-area select {
+        height: 40px;
+        font-size: 12px;
+        padding: 0 10px;
+    }
+
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .card-body {
+        padding: 10px;
+    }
+
+    .card-title {
+        font-size: 13px;
+    }
+
+    .card-product {
+        font-size: 11px;
+    }
+
     /* =========================
-       RIGHT (detail panel)
+       RIGHT (핵심 압축)
     ========================= */
     .detail-panel {
-        min-width: 720px; /* 핵심: 2패널 유지하면서 압축 */
+        min-width: 680px; /* 720 → 680 */
     }
 
     .panel-left {
-        width: 42%;
-        min-width: 320px;
-        padding: 24px 16px 24px 24px;
+        width: 40%;
+        min-width: 300px;
+        padding: 18px 14px 18px 18px;
+        gap: 12px;
     }
 
     .panel-right {
-        min-width: 380px;
-        padding: 16px;
+        min-width: 360px;
+        padding: 14px;
     }
 
     .panel-right h2 {
-        font-size: 18px;
+        font-size: 16px;
+        margin-top: 10px;
     }
 
     .info-row {
-        font-size: 13px;
-        padding: 9px 0;
+        font-size: 12px;
+        padding: 7px 0;
+        gap: 10px;
     }
 
     .info-row span {
-        max-width: 68%;
+        max-width: 65%;
     }
 
-    .sub-image-container {
-        aspect-ratio: 2 / 1; /* 유지 (깨지지 않게) */
+    .prompt-box {
+        margin-top: 14px;
     }
 
     .prompt-box textarea {
-        height: 110px;
-        font-size: 12.5px;
+        height: 100px;
+        font-size: 12px;
     }
 
     .copy-btn {
-        padding: 10px;
-        font-size: 13px;
+        padding: 9px;
+        font-size: 12.5px;
+    }
+
+    .sub-image-container {
+        aspect-ratio: 16 / 9;
     }
 }
