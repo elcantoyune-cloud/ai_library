@@ -384,7 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
             reaction: "", 
             prompt: "", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWA19M54V.jpg", 
-            subImage: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWA19M54V_detail.jpg", 
         },
         {   id: 22, 
             title: "LCWA17M54V", 
@@ -945,7 +944,6 @@ document.addEventListener("DOMContentLoaded", () => {
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW03I626.jpg", 
             subImage:"https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW03I626_detail.jpg",
         },
-
         {   id: 52, 
             title: "LCWW00M426", 
             type:  "이미지",
