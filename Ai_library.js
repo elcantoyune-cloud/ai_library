@@ -993,7 +993,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "", 
             season: "26 SPRING", 
             background: "스튜디오", 
-            tool: "Gemini", 
+            tool: "Google AI Studio", 
             created: "2026-04-06", 
             link: "\\\\172.30.235.50\\온라인팀\\New-biz\\전략비즈\\3. 자사몰\\3. 기획전\\2026\\3월\\260331_시그니처 기획전\\영상",
             usage: "기획전",
