@@ -1024,6 +1024,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const seasonOrder = { 'SPRING': 1, 'SUMMER': 2, 'AUTUMN': 3, 'WINTER': 4 };
 
+/* 일찍 생성한 것부터 
 window.allData.sort((a, b) => {
     const [yearA, termA] = a.season ? a.season.split(' ') : [0, ''];
     const [yearB, termB] = b.season ? b.season.split(' ') : [0, ''];
@@ -1045,7 +1046,30 @@ window.allData.sort((a, b) => {
     }
     // 4순위: 제목
     return (a.title || '').localeCompare(b.title || '');
+});*/
+
+window.allData.sort((a, b) => {
+    const [yearA, termA] = a.season ? a.season.split(' ') : [0, ''];
+    const [yearB, termB] = b.season ? b.season.split(' ') : [0, ''];
+    // 1순위: 년도 (최신년도가 위로)
+    if (parseInt(yearA) !== parseInt(yearB)) {
+        return parseInt(yearB) - parseInt(yearA);
+    }
+    // 2순위: 생성일 (같은 년도 내에서는 무조건 최신 날짜가 위로)
+    const createdA = new Date(a.created || '1900-01-01');
+    const createdB = new Date(b.created || '1900-01-01');
+
+    if (createdA.getTime() !== createdB.getTime()) {
+        return createdB - createdA; 
+    }
+    // 3순위: 계절
+    if (termA !== termB) {
+        return (seasonOrder[termA] || 0) - (seasonOrder[termB] || 0);
+    }
+    // 4순위: 제목
+    return (a.title || '').localeCompare(b.title || '');
 });
+
 
 
     window.allData.forEach((item, index) => {
