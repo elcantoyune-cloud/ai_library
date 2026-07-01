@@ -1004,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
             title: "LCMD43M313", 
             type:  "이미지",
             team: "WEB팀", 
-            brand: "MAZZ>", 
+            brand: "MAZZ", 
             gender: "남화", 
             category: "로퍼/드레스", 
             season: "23 SPRING", 
@@ -1018,6 +1018,77 @@ document.addEventListener("DOMContentLoaded", () => {
             prompt: "1번 이미지 속 바지를 정장 바지(블랙 컬러)로 변경해주고, 양말은 블랙으로. 2~4번 누끼컷 참고해서 신발 변경해줘. 사이즈는 1:1 , 4K 화질 이상으로 제작해줘.", 
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD43M313.jpg", 
             subImage:"https://gi.esmplus.com/elcanto01/elcanto/ai/LCMD43M313_prom.jpg",
+        },
+        {   id: 56, 
+            title: "LCWD03I226", 
+            type:  "이미지",
+            team: "WEB팀", 
+            brand: "INTENSE", 
+            gender: "여화", 
+            category: "플랫", 
+            season: "22 AUTUMN", 
+            background: "스튜디오", 
+            tool: "Gemini", 
+            created: "2026-07-01", 
+            link: "\\\\172.30.235.50\\web팀\\웹디자인\\ai 생성 이미지\\LCWD03I226",
+            usage: "컨셉컷",
+            usedIn: "자사몰 특가세일 이미지", 
+            reaction: "", 
+            prompt: "1~4번 신발을 2번처럼 제품 컨셉 화보 만들고 싶어. 5번이 화보컷인데 배경 이미지 따서 그 위에 자연스럽게 연출해줘.", 
+            image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWD03I226.jpg", 
+            subImage:"https://gi.esmplus.com/elcanto01/elcanto/ai/LCWD03I226_prom.jpg",
+        },
+        {   id: 57, 
+            title: "LCWW26M326", 
+            type:  "이미지",
+            team: "WEB팀", 
+            brand: "MAZZ", 
+            gender: "여화", 
+            category: "슬리퍼/뮬", 
+            season: "23 SUMMER", 
+            background: "스튜디오", 
+            tool: "Gemini", 
+            created: "2026-07-01", 
+            link: "\\\\172.30.235.50\\web팀\\웹디자인\\ai 생성 이미지\\LCWW26M326",
+            usage: "컨셉컷",
+            usedIn: "자사몰 특가세일 이미지", 
+            reaction: "", 
+            prompt: `
+Create ONE SINGLE IMAGE.
+
+The final image must contain TWO PAIRS OF SHOES TOGETHER IN THE SAME FRAME.
+
+One pair is brown leather.
+One pair is cream leather.
+Do NOT generate separate images.
+Do NOT isolate each colorway.
+Do NOT create product variations.
+
+Both pairs must be arranged together as a coordinated hero composition, styled like a luxury fashion campaign.
+The brown and cream shoes should be positioned naturally next to each other with slight overlap and depth, creating a premium group product shot.
+Use the exact camera angle, composition and product perspective from Reference Image 1.
+Use the lighting and mood from Reference Image 1.
+
+Create a completely different background inspired by Reference Image 2:
+- warm beige sand
+- minimal luxury desert aesthetic
+- textured sand
+- clean editorial styling
+
+The shoes are the main focus.
+Photorealistic.
+Ultra realistic luxury footwear campaign.
+85mm lens.
+Soft depth of field.
+Natural shadows.
+Magazine-quality commercial photography.
+8K.
+
+Negative prompts:
+multiple images, split composition, collage, separate products, product grid, isolated product, duplicate shoes, extra shoes, people, feet, text, logo, watermark. 
+`,
+            image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW26M326.jpg", 
+            subImage:"https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW26M326_prom.jpg",
         },
     ];
 
