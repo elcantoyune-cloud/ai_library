@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
 <meta charset="UTF-8">
-<head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI 비주얼 라이브러리</title>
 <link rel="icon" href="https://gi.esmplus.com/elcanto01/elcanto/ai/ai.png" type="image/png">
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="Ai_library.css?v=2026062401">
-<script src="Ai_library.js?v=2026062403"></script>
-</head>
+<link rel="stylesheet" href="/cssjs/Ai_library.css">
+<script src="/cssjs/Ai_library.js"></script>
 <div class="main-wrapper">
 
     <div class="container">
@@ -42,9 +39,11 @@
                 <option>부츠</option>
                 <option>힐</option>
                 <option>슬리퍼/뮬</option>
+                <option>플랫</option>
             </select>
             <select id="season"><option value="">시즌</option>
                 <option>21 WINTER</option>
+                <option>22 AUTUMN</option>   
                 <option>23 SPRING</option>
                 <option>23 SUMMER</option>
                 <option>23 AUTUMN</option>   
@@ -94,11 +93,8 @@
     <div class="detail-panel" id="detailPanel">
         <div class="empty-panel"></div>
     </div>
+
 </div>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
-</script>
+
 </body>
 </html>
