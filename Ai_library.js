@@ -1090,6 +1090,54 @@ multiple images, split composition, collage, separate products, product grid, is
             image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW26M326.jpg", 
             subImage:"https://gi.esmplus.com/elcanto01/elcanto/ai/LCWW26M326_prom.jpg",
         },
+
+
+
+        {   id: 58, 
+            title: "LCMW13I326", 
+            type:  "이미지",
+            team: "WEB팀", 
+            brand: "INTENSE", 
+            gender: "남화", 
+            category: "슬리퍼/뮬", 
+            season: "23 SUMMER", 
+            background: "스튜디오", 
+            tool: "Gemini", 
+            created: "2026-07-08", 
+            link: "\\\\172.30.235.50\\web팀\\웹디자인\\ai 생성 이미지\\LCMW13I326",
+            usage: "착화컷",
+            usedIn: "자사몰 특가세일 이미지", 
+            reaction: "", 
+            prompt: `
+1. 1번 배경 속 남자 스타일을 2번 옷으로 변경해주고, 신발은 3,4,5번 누끼첫 참고해서 바꿔 신겨줘. 남성의 얼굴은 6번 이미지 참고해줘. 사진 비율은 1:1, 8K 이상의 고화질로 만들어줘.
+2. 신발이 자세히 안보여서 앉아있는 포즈로 바꿔주고, 바닥이 더러우니 깔끔하게 변경해줘. 얼굴 필요없고 다리 꼬고 앉아서 신발 강조되게.
+`,
+            image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMW13I326.jpg", 
+            subImages: [
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMW13I326_prom1.jpg",
+                "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMW13I326_prom2.jpg"
+            ]
+        },
+        
+        {   id: 59, 
+            title: "LCMW03M326", 
+            type:  "이미지",
+            team: "WEB팀", 
+            brand: "MAZZ", 
+            gender: "남화", 
+            category: "샌들", 
+            season: "23 SUMMER", 
+            background: "스튜디오", 
+            tool: "Gemini", 
+            created: "2026-07-08", 
+            link: "\\\\172.30.235.50\\web팀\\웹디자인\\ai 생성 이미지\\LCMW03M326",
+            usage: "착화컷",
+            usedIn: "자사몰 특가세일 이미지", 
+            reaction: "", 
+            prompt: "1번 이미지처럼 신발 착화 이미지 제작할거야. 스타일(옷)은 2번으로 바꿔주고, 악세사리 다 빼줘. 신발은 3,4,5,6번 누끼컷 참고해서 신겨줘.", 
+            image: "https://gi.esmplus.com/elcanto01/elcanto/ai/LCMW03M326.jpg", 
+            subImage:"https://gi.esmplus.com/elcanto01/elcanto/ai/LCMW03M326_prom.jpg",
+        },
     ];
 
 
