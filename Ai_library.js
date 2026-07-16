@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             team: "온라인팀",
             brand: "INTENSE", 
             gender: "여화", 
-            : "힐", 
+            category: "힐", 
             season: "23 SPRING", 
            background: "스튜디오", 
             tool: "Gemini", 
