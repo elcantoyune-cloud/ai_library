@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     window.allData = [
  {   id: 1, 
             title: "LCMS35M413", 
@@ -1092,7 +1092,6 @@ multiple images, split composition, collage, separate products, product grid, is
         },
 
 
-
         {   id: 58, 
             title: "LCMW13I326", 
             type:  "이미지",
@@ -1159,6 +1158,20 @@ multiple images, split composition, collage, separate products, product grid, is
         },
     ];
 
+    // Firebase(Firestore)에 사용자가 등록한 항목을 기존 데이터에 합치기
+    try {
+        if (window.db) {
+            const snapshot = await window.db.collection('gallery_items')
+                .orderBy('createdAt', 'desc')
+                .get();
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                window.allData.push({ ...d, firebaseId: doc.id });
+            });
+        }
+    } catch (err) {
+        console.error('Firestore 데이터 불러오기 실패:', err);
+    }
 
 const seasonOrder = { 'SPRING': 1, 'SUMMER': 2, 'AUTUMN': 3, 'WINTER': 4 };
 
@@ -1358,7 +1371,15 @@ function updateDetailPanel(id){
                 </div>
             </div>
             <div class="panel-right">
-                <h2>${item.title}</h2>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <h2 style="margin-bottom:0;">${item.title}</h2>
+                    ${item.firebaseId ? `
+                        <div style="display:flex; gap:8px; flex-shrink:0;">
+                            <button type="button" onclick="editItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:1px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:13px; font-weight:600;">수정</button>
+                            <button type="button" onclick="deleteItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:0; border-radius:8px; background:#000; color:#fff; cursor:pointer; font-size:13px; font-weight:600;">삭제</button>
+                        </div>
+                    ` : ''}
+                </div>
                 <div class="info-table">
                     <div class="info-row"><strong>브랜드</strong><span>${item.brand || '-'}</span></div>
                     <div class="info-row"><strong>성별</strong><span>${item.gender || '-'}</span></div>
@@ -1517,3 +1538,238 @@ setTimeout(() => {
         const walk = (x - startX) * 1.5; 
         mainWrapper.scrollLeft = scrollLeft - walk;
     });
+
+/* ===================================================
+   신규 항목 등록 (Firebase Firestore + Storage)
+=================================================== */
+
+window.editingFirebaseId = null;
+
+function openRegisterModal(item = null) {
+    const form = document.getElementById('registerForm');
+    const modalTitle = document.getElementById('registerModalTitle');
+    const submitBtn = document.getElementById('registerSubmitBtn');
+    const mainImageLabel = document.getElementById('mainImageLabel');
+    const mainImageInput = document.getElementById('mainImageInput');
+    const mainImageHint = document.getElementById('mainImageHint');
+    const subImageHint = document.getElementById('subImageHint');
+
+    form.reset();
+
+    if (item) {
+        // 수정 모드: 기존 값 채우고, 이미지 파일은 선택 안 해도 되게 변경
+        window.editingFirebaseId = item.firebaseId;
+        modalTitle.innerText = '항목 수정';
+        submitBtn.innerText = '수정하기';
+        mainImageLabel.innerText = '대표 이미지';
+        mainImageInput.required = false;
+        mainImageHint.style.display = 'block';
+        subImageHint.style.display = 'block';
+
+        const fields = ['title','type','team','brand','gender','category','season','background','tool','created','link','usage','usedIn','reaction','prompt'];
+        fields.forEach(f => {
+            if (form[f] && item[f] !== undefined) form[f].value = item[f];
+        });
+    } else {
+        window.editingFirebaseId = null;
+        modalTitle.innerText = '새 항목 등록';
+        submitBtn.innerText = '등록하기';
+        mainImageLabel.innerText = '대표 이미지 *';
+        mainImageInput.required = true;
+        mainImageHint.style.display = 'none';
+        subImageHint.style.display = 'none';
+    }
+
+    document.getElementById('registerModal').style.display = 'flex';
+}
+
+function closeRegisterModal() {
+    window.editingFirebaseId = null;
+    document.getElementById('registerModal').style.display = 'none';
+    document.getElementById('registerForm').reset();
+}
+
+function editItem(firebaseId) {
+    const item = window.allData.find(v => v.firebaseId === firebaseId);
+    if (!item) return;
+    openRegisterModal(item);
+}
+
+async function deleteItem(firebaseId) {
+    if (!confirm('이 항목을 삭제하시겠습니까? 삭제한 내용은 복구할 수 없습니다.')) return;
+
+    try {
+        await window.db.collection('gallery_items').doc(firebaseId).delete();
+        window.allData = window.allData.filter(v => v.firebaseId !== firebaseId);
+        applyFilters();
+        showEmptyPanel();
+        alert('삭제되었습니다.');
+    } catch (err) {
+        console.error(err);
+        alert('삭제 중 오류가 발생했습니다.\n' + err.message);
+    }
+}
+
+// 용량이 큰 이미지는 업로드 전에 브라우저에서 자동으로 리사이즈/압축
+function compressImageIfNeeded(file, maxDimension = 2200, quality = 0.85, thresholdMB = 2) {
+    return new Promise((resolve) => {
+        if (!file.type.startsWith('image/') || file.size <= thresholdMB * 1024 * 1024) {
+            resolve(file); // 작은 파일은 그대로 사용
+            return;
+        }
+
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+            let { width, height } = img;
+            if (width > maxDimension || height > maxDimension) {
+                const ratio = Math.min(maxDimension / width, maxDimension / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+                URL.revokeObjectURL(objectUrl);
+                if (!blob) { resolve(file); return; }
+                resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            }, 'image/jpeg', quality);
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            resolve(file); // 압축 실패 시 원본 그대로 업로드
+        };
+
+        img.src = objectUrl;
+    });
+}
+
+// 파일 하나를 Cloudinary에 업로드하고 이미지 URL을 반환
+async function uploadFileToStorage(file) {
+    const finalFile = await compressImageIfNeeded(file);
+
+    const formData = new FormData();
+    formData.append('file', finalFile);
+    formData.append('upload_preset', window.CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'ai_library');
+
+    const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formData }
+    );
+
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error?.message || 'Cloudinary 업로드 실패');
+    }
+
+    const data = await res.json();
+    return data.secure_url;
+}
+
+async function submitRegisterForm(event) {
+    event.preventDefault();
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalLabel = submitBtn.innerText;
+    const isEditing = !!window.editingFirebaseId;
+
+    const mainFile = form.mainImage.files[0];
+    if (!isEditing && !mainFile) {
+        alert('대표 이미지를 선택해주세요.');
+        return;
+    }
+
+    submitBtn.disabled = true;
+
+    try {
+        const subFiles = Array.from(form.subImages.files || []);
+        const filesToUpload = (mainFile ? 1 : 0) + subFiles.length;
+        let doneCount = 0;
+        const updateProgress = () => {
+            submitBtn.innerText = filesToUpload > 0
+                ? `업로드 중... (${doneCount}/${filesToUpload})`
+                : '저장 중...';
+        };
+        updateProgress();
+
+        // 새로 선택한 이미지가 있으면 업로드, 없으면(수정 모드) 기존 값 유지
+        let mainImageUrl, subImageUrls;
+
+        if (mainFile) {
+            mainImageUrl = await uploadFileToStorage(mainFile);
+            doneCount++; updateProgress();
+        } else {
+            const existing = window.allData.find(v => v.firebaseId === window.editingFirebaseId);
+            mainImageUrl = existing ? existing.image : '';
+        }
+
+        if (subFiles.length > 0) {
+            subImageUrls = [];
+            for (const f of subFiles) {
+                const url = await uploadFileToStorage(f);
+                doneCount++; updateProgress();
+                subImageUrls.push(url);
+            }
+        } else {
+            const existing = window.allData.find(v => v.firebaseId === window.editingFirebaseId);
+            subImageUrls = existing ? (existing.subImages || (existing.subImage ? [existing.subImage] : [])) : [];
+        }
+
+        const itemData = {
+            title: form.title.value.trim(),
+            type: form.type.value,
+            team: form.team.value,
+            brand: form.brand.value,
+            gender: form.gender.value,
+            category: form.category.value,
+            season: form.season.value,
+            background: form.background.value,
+            tool: form.tool.value,
+            created: form.created.value,
+            link: form.link.value.trim(),
+            usage: form.usage.value,
+            usedIn: form.usedIn.value.trim(),
+            reaction: form.reaction.value.trim(),
+            prompt: form.prompt.value.trim(),
+            image: mainImageUrl,
+            subImages: subImageUrls,
+        };
+
+        submitBtn.innerText = '정보 저장 중...';
+
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(
+                'Firestore 응답이 30초 넘게 없습니다. 사내망 방화벽/프록시가 연결을 막고 있을 수 있습니다. 다른 네트워크(개인 핫스팟 등)에서 다시 시도해보세요.'
+            )), 30000)
+        );
+
+        const savePromise = isEditing
+            ? window.db.collection('gallery_items').doc(window.editingFirebaseId).update({
+                  ...itemData,
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              })
+            : window.db.collection('gallery_items').add({
+                  ...itemData,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+
+        await Promise.race([savePromise, timeoutPromise]);
+
+        alert(isEditing ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.');
+        closeRegisterModal();
+        location.reload();
+
+    } catch (err) {
+        console.error(err);
+        alert((isEditing ? '수정' : '등록') + ' 중 오류가 발생했습니다.\n' + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalLabel;
+    }
+}

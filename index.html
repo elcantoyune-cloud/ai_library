@@ -4,13 +4,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI 비주얼 라이브러리</title>
 <link rel="icon" href="https://gi.esmplus.com/elcanto01/elcanto/ai/ai.png" type="image/png">
-<link rel="stylesheet" href="./Ai_library.css?v=2026070102">
-<script src="./Ai_library.js?v=2026070103"></script>
+<link rel="stylesheet" href="/Ai_library.css">
+
+<!-- Firebase (Firestore: 데이터 저장) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+<script src="/firebase-config.js"></script>
+
+<!-- Cloudinary (이미지 업로드/호스팅) -->
+<script src="/cloudinary-config.js"></script>
+
+<script src="/Ai_library.js"></script>
 <div class="main-wrapper">
 
     <div class="container">
         <div class="header">
             <h1>AI 비주얼 라이브러리</h1>
+            <button class="register-btn" onclick="openRegisterModal()">+ 새 항목 등록</button>
         </div>
 
         <div class="search-wrap">
@@ -92,6 +102,166 @@
 
     <div class="detail-panel" id="detailPanel">
         <div class="empty-panel"></div>
+    </div>
+
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="registerModalTitle">새 항목 등록</h2>
+                <button type="button" class="modal-close" onclick="closeRegisterModal()">&times;</button>
+            </div>
+
+            <form id="registerForm" onsubmit="submitRegisterForm(event)">
+                <div class="form-grid">
+                    <div class="form-field full">
+                        <label>제목 *</label>
+                        <input type="text" name="title" required placeholder="예: LCMS35M413">
+                    </div>
+
+                    <div class="form-field">
+                        <label>타입 *</label>
+                        <select name="type" required>
+                            <option value="이미지">이미지</option>
+                            <option value="영상">영상</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>생성 부서 *</label>
+                        <select name="team" required>
+                            <option value="WEB팀">WEB팀</option>
+                            <option value="온라인팀">온라인팀</option>
+                            <option value="오프라인팀">오프라인팀</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>브랜드 *</label>
+                        <select name="brand" required>
+                            <option value="ELCANTO">ELCANTO</option>
+                            <option value="MAZZ">MAZZ</option>
+                            <option value="INTENSE">INTENSE</option>
+                            <option value="DEEPP">DEEPP</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>성별 *</label>
+                        <select name="gender" required>
+                            <option value="남화">남화</option>
+                            <option value="여화">여화</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>카테고리 *</label>
+                        <select name="category" required>
+                            <option>샌들</option>
+                            <option>로퍼/드레스</option>
+                            <option>컴포트화</option>
+                            <option>스니커즈</option>
+                            <option>부츠</option>
+                            <option>힐</option>
+                            <option>슬리퍼/뮬</option>
+                            <option>플랫</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>시즌 *</label>
+                        <select name="season" required>
+                            <option>21 WINTER</option>
+                            <option>22 AUTUMN</option>
+                            <option>23 SPRING</option>
+                            <option>23 SUMMER</option>
+                            <option>23 AUTUMN</option>
+                            <option>24 SPRING</option>
+                            <option>24 SUMMER</option>
+                            <option>24 AUTUMN</option>
+                            <option>25 WINTER</option>
+                            <option selected>26 SPRING</option>
+                            <option>26 SUMMER</option>
+                            <option>26 AUTUMN</option>
+                            <option>26 WINTER</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>장소 컨셉 *</label>
+                        <select name="background" required>
+                            <option value="야외">야외</option>
+                            <option value="스튜디오">스튜디오</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>유형 *</label>
+                        <select name="usage" required>
+                            <option>기획전</option>
+                            <option>착화컷</option>
+                            <option>컨셉컷</option>
+                            <option>배너</option>
+                            <option>SNS·광고</option>
+                            <option>상세페이지</option>
+                            <option>기타</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>AI 툴 *</label>
+                        <select name="tool" required>
+                            <option>Google AI Studio</option>
+                            <option>Gemini</option>
+                            <option>Chat GPT</option>
+                            <option>Grok</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label>생성일 *</label>
+                        <input type="date" name="created" required>
+                    </div>
+
+                    <div class="form-field full">
+                        <label>원본 이미지 경로 (사내 서버 등)</label>
+                        <input type="text" name="link" placeholder="\\172.30.235.50\...">
+                    </div>
+
+                    <div class="form-field full">
+                        <label>활용 내용</label>
+                        <input type="text" name="usedIn" placeholder="예: 자사몰 특가세일 착화 이미지">
+                    </div>
+
+                    <div class="form-field full">
+                        <label>참고사항</label>
+                        <input type="text" name="reaction" placeholder="예: 얼굴 사용 가능, 착화컷 위주 사용">
+                    </div>
+
+                    <div class="form-field full">
+                        <label>Prompt</label>
+                        <textarea name="prompt" rows="4" placeholder="사용한 프롬프트를 입력하세요"></textarea>
+                    </div>
+
+                    <div class="form-field full">
+                        <label id="mainImageLabel">대표 이미지 *</label>
+                        <input type="file" id="mainImageInput" name="mainImage" accept="image/*" required>
+                        <small id="mainImageHint" style="display:none; color:#888;">비워두면 기존 이미지를 그대로 사용합니다.</small>
+                    </div>
+
+                    <div class="form-field full">
+                        <label>상세/서브 이미지 (여러 장 선택 가능)</label>
+                        <input type="file" name="subImages" accept="image/*" multiple>
+                        <small id="subImageHint" style="display:none; color:#888;">비워두면 기존 서브 이미지를 그대로 사용합니다.</small>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="reset-btn" onclick="closeRegisterModal()">취소</button>
+                    <button type="submit" class="search-btn" id="registerSubmitBtn">등록하기</button>
+                </div>
+            </form>
+        </div>
     </div>
 
 </div>

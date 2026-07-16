@@ -286,6 +286,8 @@
             max-width: 70%;
         }
 
+        
+
         .info-row.performance {
             background: #f4f7fa;
             padding: 14px 12px;
@@ -413,5 +415,134 @@
             background: #0066ff;
             width: 8px;
         }
+ㅍ
+/* ===== 등록 버튼 ===== */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
 
+.register-btn {
+    height: 40px;
+    padding: 0 15px;
+    margin-top: 16px;
+    border: 0;
+    border-radius: 10px;
+    background: #0066ff;
+    color: #fff;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+.register-btn:hover {
+    background: #0052cc;
+}
 
+/* ===== 등록 모달 ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.modal-box {
+    background: #fff;
+    width: 100%;
+    max-width: 640px;
+    max-height: 88vh;
+    border-radius: 16px;
+    overflow-y: auto;
+    padding: 28px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.modal-close {
+    background: none;
+    border: 0;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    color: #888;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field.full {
+    grid-column: 1 / -1;
+}
+
+.form-field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-field input[type="text"],
+.form-field input[type="date"],
+.form-field select,
+.form-field textarea,
+.form-field input[type="file"] {
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-family: inherit;
+    background: #fff;
+}
+
+.form-field input[type="file"] {
+    padding: 9px 10px;
+}
+
+.form-field textarea {
+    height: auto;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.modal-actions button {
+    height: 46px;
+    padding: 0 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+}
