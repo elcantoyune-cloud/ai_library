@@ -1,4 +1,51 @@
+// 로그인 상태가 될 때까지 대기 (로그인 화면 표시/숨김 처리 포함)
+function waitForAuth() {
+    return new Promise((resolve) => {
+        window.auth.onAuthStateChanged((user) => {
+            const loginScreen = document.getElementById('loginScreen');
+            const mainWrapper = document.getElementById('mainWrapper');
+            if (user) {
+                loginScreen.style.display = 'none';
+                mainWrapper.style.display = 'flex';
+                window.currentUser = user;
+                resolve(user);
+            } else {
+                loginScreen.style.display = 'flex';
+                mainWrapper.style.display = 'none';
+                window.currentUser = null;
+            }
+        });
+    });
+}
+
+async function loginUser(event) {
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginSubmitBtn');
+
+    errorEl.innerText = '';
+    btn.disabled = true;
+    btn.innerText = '로그인 중...';
+
+    try {
+        await window.auth.signInWithEmailAndPassword(email, password);
+        // 성공 시 onAuthStateChanged가 감지해서 자동으로 화면 전환됨
+    } catch (err) {
+        errorEl.innerText = '이메일 또는 비밀번호가 올바르지 않습니다.';
+        btn.disabled = false;
+        btn.innerText = '로그인';
+    }
+}
+
+function logoutUser() {
+    window.auth.signOut().then(() => location.reload());
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+    await waitForAuth();
+
     window.allData = [
  {   id: 1, 
             title: "LCMS35M413", 
@@ -84,7 +131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             team: "WEB팀",
             brand: "ELCANTO", 
             gender: "기타", 
-            category : "로퍼/드레스", 
+            category: "로퍼/드레스", 
             season: "26 SUMMER", 
             background: "야외", 
             tool: "Gemini", 
@@ -102,8 +149,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             type:  "영상",
             team: "WEB팀",
             brand: "ELCANTO", 
+            category: "기획전", 
             gender: "기타", 
-            category: "기타", 
             season: "25 WINTER", 
             background: "야외", 
             tool: "Grok", 
@@ -897,7 +944,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             team: "WEB팀", 
             brand: "ELCANTO", 
             gender: "기타", 
-            category: "기타", 
+            category: "기획전", 
             season: "26 SUMMER", 
              background: "야외", 
             tool: "Gemini", 
@@ -988,7 +1035,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             team: "WEB팀", 
             brand: "ELCANTO", 
             gender: "기타", 
-            category: "기타", 
+            category: "기획전", 
             season: "26 SPRING", 
             background: "스튜디오", 
             tool: "Google AI Studio", 
@@ -1376,10 +1423,15 @@ function updateDetailPanel(id){
                     ${item.firebaseId ? `
                         <div style="display:flex; gap:8px; flex-shrink:0;">
                             <button type="button" onclick="editItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:1px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:13px; font-weight:600;">수정</button>
-                            <button type="button" onclick="deleteItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:0; border-radius:8px; background:#000; color:#fff; cursor:pointer; font-size:13px; font-weight:600;">삭제</button>
+                            <button type="button" onclick="deleteItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:0; border-radius:8px; background:#ff3b30; color:#fff; cursor:pointer; font-size:13px; font-weight:600;">삭제</button>
                         </div>
                     ` : ''}
                 </div>
+                ${item.firebaseId && (item.createdBy || item.updatedBy) ? `
+                    <div style="font-size:12px; color:#999; margin-top:2px;">
+                        ${item.createdBy ? `등록자: ${item.createdBy}` : ''}${item.updatedBy ? ` · 최종 수정: ${item.updatedBy}` : ''}
+                    </div>
+                ` : ''}
                 <div class="info-table">
                     <div class="info-row"><strong>브랜드</strong><span>${item.brand || '-'}</span></div>
                     <div class="info-row"><strong>성별</strong><span>${item.gender || '-'}</span></div>
@@ -1488,7 +1540,7 @@ function showEmptyPanel() {
 function copyPrompt(){
     const text = document.getElementById('promptText').value;
     navigator.clipboard.writeText(text);
-    alert('프롬프트가 클립보드에 복사되었습니다.');
+    customAlert('프롬프트가 클립보드에 복사되었습니다.');
 }
 
 setTimeout(() => {
@@ -1589,6 +1641,49 @@ function closeRegisterModal() {
     document.getElementById('registerForm').reset();
 }
 
+// 브라우저 기본 alert()/confirm() 대신 사이트 디자인에 맞는 커스텀 팝업
+function showModal({ message, okText = '확인', cancelText = null, danger = false }) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        const msgEl = document.getElementById('confirmMessage');
+        const okBtn = document.getElementById('confirmOkBtn');
+        const cancelBtn = document.getElementById('confirmCancelBtn');
+
+        msgEl.innerText = message;
+        okBtn.innerText = okText;
+        okBtn.className = danger ? 'confirm-danger-btn' : 'confirm-ok-btn';
+
+        if (cancelText) {
+            cancelBtn.style.display = '';
+            cancelBtn.innerText = cancelText;
+        } else {
+            cancelBtn.style.display = 'none';
+        }
+
+        modal.style.display = 'flex';
+
+        const cleanup = (result) => {
+            modal.style.display = 'none';
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+            resolve(result);
+        };
+        const onOk = () => cleanup(true);
+        const onCancel = () => cleanup(false);
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+    });
+}
+
+function customAlert(message) {
+    return showModal({ message, okText: '확인', cancelText: null, danger: false });
+}
+
+function customConfirm(message) {
+    return showModal({ message, okText: '삭제', cancelText: '취소', danger: true });
+}
+
 function editItem(firebaseId) {
     const item = window.allData.find(v => v.firebaseId === firebaseId);
     if (!item) return;
@@ -1596,17 +1691,18 @@ function editItem(firebaseId) {
 }
 
 async function deleteItem(firebaseId) {
-    if (!confirm('이 항목을 삭제하시겠습니까? 삭제한 내용은 복구할 수 없습니다.')) return;
+    const confirmed = await customConfirm('이 항목을 삭제하시겠습니까?\n삭제한 내용은 복구할 수 없습니다.');
+    if (!confirmed) return;
 
     try {
         await window.db.collection('gallery_items').doc(firebaseId).delete();
         window.allData = window.allData.filter(v => v.firebaseId !== firebaseId);
         applyFilters();
         showEmptyPanel();
-        alert('삭제되었습니다.');
+        customAlert('삭제되었습니다.');
     } catch (err) {
         console.error(err);
-        alert('삭제 중 오류가 발생했습니다.\n' + err.message);
+        customAlert('삭제 중 오류가 발생했습니다.\n' + err.message);
     }
 }
 
@@ -1682,7 +1778,7 @@ async function submitRegisterForm(event) {
 
     const mainFile = form.mainImage.files[0];
     if (!isEditing && !mainFile) {
-        alert('대표 이미지를 선택해주세요.');
+        customAlert('대표 이미지를 선택해주세요.');
         return;
     }
 
@@ -1753,22 +1849,24 @@ async function submitRegisterForm(event) {
         const savePromise = isEditing
             ? window.db.collection('gallery_items').doc(window.editingFirebaseId).update({
                   ...itemData,
-                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  updatedBy: window.currentUser ? window.currentUser.email : null
               })
             : window.db.collection('gallery_items').add({
                   ...itemData,
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  createdBy: window.currentUser ? window.currentUser.email : null
               });
 
         await Promise.race([savePromise, timeoutPromise]);
 
-        alert(isEditing ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.');
+        await customAlert(isEditing ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.');
         closeRegisterModal();
         location.reload();
 
     } catch (err) {
         console.error(err);
-        alert((isEditing ? '수정' : '등록') + ' 중 오류가 발생했습니다.\n' + err.message);
+        customAlert((isEditing ? '수정' : '등록') + ' 중 오류가 발생했습니다.\n' + err.message);
         submitBtn.disabled = false;
         submitBtn.innerText = originalLabel;
     }
