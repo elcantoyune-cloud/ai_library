@@ -11,6 +11,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 window.db = firebase.firestore();
+window.auth = firebase.auth();
 window.db.settings({
   experimentalAutoDetectLongPolling: true,
   useFetchStreams: false
