@@ -1,2 +1,2 @@
 window.CLOUDINARY_CLOUD_NAME = "xn7ywpja";      
-window.CLOUDINARY_UPLOAD_PRESET = "AI LIBRARY"; 
+window.CLOUDINARY_UPLOAD_PRESET = "AI Visual Library"; 
