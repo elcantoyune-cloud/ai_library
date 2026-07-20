@@ -1,4 +1,3 @@
-// 로그인 상태가 될 때까지 대기 (로그인 화면 표시/숨김 처리 포함)
 function waitForAuth() {
     return new Promise((resolve) => {
         window.auth.onAuthStateChanged((user) => {
