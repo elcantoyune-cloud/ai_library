@@ -1712,7 +1712,7 @@ async function deleteItem(firebaseId) {
 }
 
 // 용량이 큰 이미지는 업로드 전에 브라우저에서 자동으로 리사이즈/압축
-function compressImageIfNeeded(file, maxDimension = 900, quality = 0.6, thresholdMB = 0.3) {
+function compressImageIfNeeded(file, maxDimension = 2200, quality = 0.85, thresholdMB = 2) {
     return new Promise((resolve) => {
         if (!file.type.startsWith('image/') || file.size <= thresholdMB * 1024 * 1024) {
             resolve(file); // 작은 파일은 그대로 사용
@@ -1790,10 +1790,7 @@ async function submitRegisterForm(event) {
     submitBtn.disabled = true;
 
     try {
-        // 브라우저가 넘겨주는 파일 선택 순서가 클릭 순서와 다를 수 있어,
-        // 파일명 기준으로 자연 정렬(숫자 포함)해서 항상 예측 가능한 순서로 업로드
-        const subFiles = Array.from(form.subImages.files || [])
-            .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+        const subFiles = Array.from(form.subImages.files || []);
         const filesToUpload = (mainFile ? 1 : 0) + subFiles.length;
         let doneCount = 0;
         const updateProgress = () => {
