@@ -1,4 +1,8 @@
-        * {margin: 0; padding: 0;  box-sizing: border-box;        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: Pretendard, sans-serif;
@@ -543,6 +547,7 @@
     cursor: pointer;
 }
 
+/* ===== 커스텀 확인창 ===== */
 .confirm-box {
     background: #fff;
     width: 100%;

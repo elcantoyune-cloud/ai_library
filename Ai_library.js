@@ -48,7 +48,8 @@ function logoutUser() {
 document.addEventListener("DOMContentLoaded", async () => {
     await waitForAuth();
 
-    window.allData = [    ];
+    window.allData = [
+    ];
 
     // Firebase(Firestore)에 사용자가 등록한 항목을 기존 데이터에 합치기
     try {
