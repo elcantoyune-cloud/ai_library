@@ -661,10 +661,8 @@ async function submitRegisterForm(event) {
     submitBtn.disabled = true;
 
     try {
-        // 브라우저가 넘겨주는 파일 선택 순서가 클릭 순서와 다를 수 있어,
-        // 파일명 기준으로 자연 정렬(숫자 포함)해서 항상 예측 가능한 순서로 업로드
-        const subFiles = Array.from(form.subImages.files || [])
-            .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+        // 파일명 기준 정렬 없이, 사용자가 클릭(선택)한 순서 그대로 사용
+        const subFiles = Array.from(form.subImages.files || []);
         const filesToUpload = (mainFile ? 1 : 0) + subFiles.length;
         let doneCount = 0;
         const updateProgress = () => {
