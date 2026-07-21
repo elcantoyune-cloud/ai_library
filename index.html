@@ -6,10 +6,13 @@
 <link rel="icon" href="https://gi.esmplus.com/elcanto01/elcanto/ai/ai.png" type="image/png">
 <link rel="stylesheet" href="./Ai_library.css?v=2026071603">
 
+<!-- Firebase (Firestore: 데이터 저장 / Auth: 로그인) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 <script src="./firebase-config.js"></script>
+
+<!-- Cloudinary (이미지 업로드/호스팅) -->
 <script src="./cloudinary-config.js?v=2026071603"></script>
 <script src="./Ai_library.js?v=2026071605"></script>
 
@@ -177,6 +180,7 @@
                             <option>힐</option>
                             <option>슬리퍼/뮬</option>
                             <option>플랫</option>
+                            <option>기타</option>
                         </select>
                     </div>
 
@@ -192,8 +196,8 @@
                             <option>24 SUMMER</option>
                             <option>24 AUTUMN</option>
                             <option>25 WINTER</option>
-                            <option selected>26 SPRING</option>
-                            <option>26 SUMMER</option>
+                            <option>26 SPRING</option>
+                            <option selected>26 SUMMER</option>
                             <option>26 AUTUMN</option>
                             <option>26 WINTER</option>
                         </select>
@@ -202,8 +206,8 @@
                     <div class="form-field">
                         <label>장소 컨셉 *</label>
                         <select name="background" required>
-                            <option value="야외">야외</option>
                             <option value="스튜디오">스튜디오</option>
+                            <option value="야외">야외</option>
                         </select>
                     </div>
 
@@ -223,8 +227,8 @@
                     <div class="form-field">
                         <label>AI 툴 *</label>
                         <select name="tool" required>
-                            <option>Google AI Studio</option>
                             <option>Gemini</option>
+                            <option>Google AI Studio</option>
                             <option>Chat GPT</option>
                             <option>Grok</option>
                         </select>
