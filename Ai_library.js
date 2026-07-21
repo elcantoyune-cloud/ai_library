@@ -491,6 +491,7 @@ function openRegisterModal(item = null) {
     const subImageHint = document.getElementById('subImageHint');
 
     form.reset();
+    submitBtn.disabled = false;
 
     if (item) {
         // 수정 모드: 기존 값 채우고, 이미지 파일은 선택 안 해도 되게 변경
@@ -759,6 +760,8 @@ async function submitRegisterForm(event) {
                     _key: editingId
                 };
             }
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalLabel;
             closeRegisterModal();
             applyFilters();
             updateDetailPanel(editingId);
@@ -771,6 +774,8 @@ async function submitRegisterForm(event) {
                 createdBy: window.currentUser ? window.currentUser.email : null
             };
             window.allData.unshift(newItem);
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalLabel;
             closeRegisterModal();
             applyFilters();
             updateDetailPanel(newFirebaseId);
