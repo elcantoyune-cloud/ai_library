@@ -74,6 +74,14 @@ function logoutUser() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // 브라우저/앱 창을 닫으면 로그인 상태가 유지되지 않고 자동 로그아웃 되도록
+    // 지속성을 SESSION으로 설정 (탭/창이 열려있는 동안만 로그인 유지, 닫으면 초기화됨)
+    try {
+        await window.auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+    } catch (err) {
+        console.error('로그인 지속성 설정 실패:', err);
+    }
+
     await waitForAuth();
 
     window.allData = [    ];
