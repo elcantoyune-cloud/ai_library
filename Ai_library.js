@@ -797,3 +797,4 @@ async function submitRegisterForm(event) {
         submitBtn.innerText = originalLabel;
     }
 }
+

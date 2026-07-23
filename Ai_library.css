@@ -681,15 +681,15 @@
 .detail-close-btn {
     display: none;
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 25px;
+    right: 25px;
     width: 36px;
     height: 36px;
     border: 0;
     border-radius: 50%;
     background: rgba(17,17,17,0.06);
     color: #111;
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
     align-items: center;
     justify-content: center;
@@ -811,14 +811,19 @@
         display: flex;
     }
 
-    /* 등록/수정 모달 */
-    .modal-overlay {
-        padding: 16px;
+    /* 등록/수정 모달 - 여백/카드 형태 대신 화면 전체를 꽉 채우는 전체화면으로 표시
+       (confirmModal의 삭제 확인 팝업은 작은 카드 형태를 유지해야 하므로 #registerModal에만 한정) */
+    #registerModal {
+        padding: 0;
+        align-items: stretch;
+        justify-content: stretch;
     }
     .modal-box {
         width: 100%;
         max-width: 100%;
-        padding: 22px;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
         overflow-x: hidden;
     }
 }
@@ -883,7 +888,6 @@
 
     .modal-box {
         padding: 18px;
-        max-height: 92vh;
     }
 
     .login-box {
