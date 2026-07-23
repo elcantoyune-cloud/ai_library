@@ -265,6 +265,7 @@ function updateDetailPanel(key){
     
     detailPanel.innerHTML = `
         <div class="panel-content">
+            <button type="button" class="detail-close-btn" onclick="showEmptyPanel()" aria-label="닫기">&times;</button>
             <div class="panel-left">
                 <div class="image-wrap">
                     <img src="${item.image}" class="main-image">
