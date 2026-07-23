@@ -4,7 +4,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI 비주얼 라이브러리</title>
 <link rel="icon" href="https://gi.esmplus.com/elcanto01/elcanto/ai/ai.png" type="image/png">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0066ff">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="./Ai_library.css?v=2026072308">
+<script src="./pwa-install.js"></script>
 
 <!-- Firebase (Firestore: 데이터 저장 / Auth: 로그인) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -33,6 +37,7 @@
         <div class="header">
             <h1>AI 비주얼 라이브러리</h1>
             <div style="display:flex; align-items:center; gap:8px;">
+                <button class="register-btn" id="installAppBtn" onclick="handleAppInstallClick()" style="display:none;">📲 앱 설치</button>
                 <button class="register-btn" onclick="openRegisterModal()">+ 새 항목 등록</button>
                 <button class="logout-btn" onclick="logoutUser()">로그아웃</button>
             </div>
@@ -286,6 +291,19 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('pwa-install-available', () => {
+            const btn = document.getElementById('installAppBtn');
+            if (btn) btn.style.display = 'inline-flex';
+        });
+        async function handleAppInstallClick() {
+            const result = await window.triggerPwaInstall();
+            if (result === 'accepted') {
+                document.getElementById('installAppBtn').style.display = 'none';
+            }
+        }
+    </script>
 
     <div class="modal-overlay" id="confirmModal">
         <div class="confirm-box">
