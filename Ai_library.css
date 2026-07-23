@@ -489,18 +489,27 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
+    min-width: 0;
 }
 
 .form-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 
 .form-field.full {
     grid-column: 1 / -1;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .form-field label {
@@ -677,6 +686,11 @@
     background: #f5f5f5;
 }
 
+/* PC에서는 "등록자: · 최종 수정:" 한 줄로 표시 (기본 숨김), 모바일/태블릿 미디어쿼리에서만 줄바꿈으로 노출 */
+.mobile-only-break {
+    display: none;
+}
+
 /* ===== 상세 팝업 닫기 버튼 (기본은 숨김 · 모바일/태블릿 미디어쿼리에서만 노출) ===== */
 .detail-close-btn {
     display: none;
@@ -818,6 +832,7 @@
     .modal-box {
         width: 100%;
         max-width: 100%;
+        min-width: 0;
         max-height: 90vh;
         overflow-x: hidden;
     }
@@ -878,7 +893,7 @@
 
     /* 등록 모달 폼: 2열 -> 1열 */
     .form-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .modal-box {
