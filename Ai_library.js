@@ -265,6 +265,7 @@ function updateDetailPanel(key){
     
     detailPanel.innerHTML = `
         <div class="panel-content">
+            <button type="button" class="detail-close-btn" onclick="showEmptyPanel()" aria-label="닫기">&times;</button>
             <div class="panel-left">
                 <div class="image-wrap">
                     <img src="${item.image}" class="main-image">
@@ -376,16 +377,19 @@ function initSubSlider() {
     let currentTranslate = 0;
     let prevTranslate = 0;
 
-    container.addEventListener('mousedown', (e) => {
+    container.addEventListener('pointerdown', (e) => {
+        // 불렛(점)을 터치했을 때는 드래그 로직이 개입하지 않도록 제외 (불렛 자체 클릭으로 전환 처리)
+        if (e.target.closest('.sub-slider-bullets')) return;
+
         isDragging = true;
         startX = e.clientX;
-        wrapper.style.transition = 'none'; 
+        wrapper.style.transition = 'none';
+        try { container.setPointerCapture(e.pointerId); } catch (err) {}
 
-        const totalSlides = bullets.length;
         prevTranslate = -window.currentSubIndex * (container.offsetWidth);
     });
 
-    container.addEventListener('mousemove', (e) => {
+    container.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
         const currentX = e.clientX;
         const dragDistance = currentX - startX;
@@ -393,10 +397,10 @@ function initSubSlider() {
         wrapper.style.transform = `translateX(${currentTranslate}px)`;
     });
 
-    const handleMouseUp = (e) => {
+    const handlePointerUp = (e) => {
         if (!isDragging) return;
         isDragging = false;
-        
+
         const movedBy = e.clientX - startX;
         const triggerDistance = container.offsetWidth * 0.2; 
 
@@ -409,8 +413,9 @@ function initSubSlider() {
         moveSubSlide(window.currentSubIndex);
     };
 
-    container.addEventListener('mouseup', handleMouseUp);
-    container.addEventListener('mouseleave', handleMouseUp);
+    container.addEventListener('pointerup', handlePointerUp);
+    container.addEventListener('pointercancel', handlePointerUp);
+    container.addEventListener('pointerleave', handlePointerUp);
 }
 
 
@@ -452,7 +457,11 @@ setTimeout(() => {
     let scrollLeft;
 
     mainWrapper.addEventListener('pointerdown', (e) => {
-        if(e.target.closest('input') || e.target.closest('select') || e.target.closest('.sub-image-container') || e.target.closest('textarea')) return;
+        // 모바일/태블릿 레이아웃(세로 스택)에서는 가로 드래그 스크롤이 필요 없고,
+        // 모달/팝업 내부를 터치했을 때 화면이 옆으로 흔들리는 원인이 되므로 비활성화
+        if (window.matchMedia('(max-width: 1024px)').matches) return;
+
+        if(e.target.closest('input') || e.target.closest('select') || e.target.closest('.sub-image-container') || e.target.closest('textarea') || e.target.closest('.modal-overlay')) return;
         
         isDown = true;
         mainWrapper.setPointerCapture(e.pointerId);
