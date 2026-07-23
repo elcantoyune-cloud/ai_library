@@ -683,7 +683,7 @@
     position: absolute;
     top: 25px;
     right: 25px;
-    width: 34px;
+    width: 36px;
     height: 36px;
     border: 0;
     border-radius: 50%;
@@ -811,14 +811,14 @@
         display: flex;
     }
 
-    /* 등록/수정 모달 */
-    .modal-overlay {
+    /* 등록/수정 모달 - 전체화면이 아니라 여백을 둔 팝업(카드) 형태 유지, 화면 폭만 안 넘치게 조정 */
+    #registerModal {
         padding: 16px;
     }
     .modal-box {
         width: 100%;
         max-width: 100%;
-        padding: 22px;
+        max-height: 90vh;
         overflow-x: hidden;
     }
 }
@@ -883,7 +883,6 @@
 
     .modal-box {
         padding: 18px;
-        max-height: 92vh;
     }
 
     .login-box {
