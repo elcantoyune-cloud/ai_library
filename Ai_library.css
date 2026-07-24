@@ -724,11 +724,12 @@
 
 /* =====================================================================
    반응형 (모바일 / 태블릿 전용)
-   설치된 PC 앱(마우스 환경, standalone)은 이 구간에서 제외 —
-   창이 좁아져도 모바일 레이아웃으로 전환하지 않고 데스크탑 레이아웃을
-   그대로 유지한 채 가로 스크롤만 생기도록 함 (내부 요소 크기 유지)
+   마우스 환경(PC, pointer: fine)은 이 구간에서 완전히 제외 — 설치 앱이든
+   일반 브라우저 탭이든 상관없이, 창이 좁아져도 모바일 레이아웃으로
+   전환하지 않고 데스크탑 레이아웃을 그대로 유지한 채 가로 스크롤만
+   생기도록 함 (내부 요소 크기 유지). 터치 기기(모바일/태블릿)만 이 구간 적용.
    ===================================================================== */
-@media (max-width: 1320px) and (not ((display-mode: standalone) and (pointer: fine))) {
+@media (max-width: 1320px) and (not (pointer: fine)) {
 
     body {
         overflow: auto;
@@ -845,7 +846,7 @@
 }
 
 /* ===== 모바일(휴대폰) 전용: 640px 이하 세부 조정 ===== */
-@media (max-width: 640px) and (not ((display-mode: standalone) and (pointer: fine))) {
+@media (max-width: 640px) and (not (pointer: fine)) {
 
     .container {
         padding: 12px;
