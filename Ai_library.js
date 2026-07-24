@@ -191,7 +191,7 @@ function renderCards(data){
             <img src="${item.image}">
             <div class="card-body">
                 <div class="card-title">${item.title}</div>
-                <div class="card-product">${item.brand} · ${item.gender} · ${item.category}<br>${item.season} · ${item.tool}</div>
+                <div class="card-product">${item.brand} · ${item.gender} · ${item.category}<br>${item.season}</div>
                 <div class="card-tags">
                     <span>#${item.background}</span>
                     <span>#${item.tool}</span>
