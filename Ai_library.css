@@ -541,7 +541,10 @@
 }
 
 .form-field input[type="file"] {
-    padding: 9px 10px;
+    height: auto;
+    padding: 15px 12px;
+    display: flex;
+    align-items: center;
 }
 
 .form-field textarea {
@@ -759,6 +762,7 @@
         min-height: 100vh;
         border-right: 0;
         padding: 16px;
+        overflow-y: visible;
     }
 
     .header {
@@ -797,6 +801,9 @@
 
     /* 팝업이 떠 있는 동안 뒤 배경 스크롤 방지 */
     body:has(.detail-panel .panel-content) {
+        overflow: hidden;
+    }
+    body:has(.detail-panel .panel-content) .container {
         overflow: hidden;
     }
 
