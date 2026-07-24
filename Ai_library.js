@@ -74,10 +74,10 @@ function logoutUser() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // 브라우저/앱 창을 닫으면 로그인 상태가 유지되지 않고 자동 로그아웃 되도록
-    // 지속성을 SESSION으로 설정 (탭/창이 열려있는 동안만 로그인 유지, 닫으면 초기화됨)
+    // 브라우저/앱 창을 닫아도 로그인 상태가 유지되도록
+    // 지속성을 LOCAL로 설정 (기기에 저장되어, 로그아웃을 직접 누르기 전까지 유지됨)
     try {
-        await window.auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+        await window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     } catch (err) {
         console.error('로그인 지속성 설정 실패:', err);
     }
@@ -257,6 +257,14 @@ function updateDetailPanel(key){
     const item = window.allData.find(v => v._key === key);
     if(!item) return;
 
+    // 모바일/태블릿(터치) 팝업 오픈 시, CSS(:has) 반영을 기다리지 않고
+    // 즉시 리스트 스크롤을 막아서 리스트 스크롤바가 남아있다 사라지는 겹침 현상을 방지
+    if (!window.matchMedia('(pointer: fine)').matches) {
+        document.body.style.overflow = 'hidden';
+        const listEl = document.querySelector('.container');
+        if (listEl) listEl.style.overflow = 'hidden';
+    }
+
     document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
     const targetCard = document.getElementById(`card-${key}`);
     if(targetCard) targetCard.classList.add('selected');
@@ -424,6 +432,9 @@ function showEmptyPanel() {
     document.getElementById('detailPanel').innerHTML = `
         <div class="empty-panel">왼쪽 리스트에서 카드를 클릭하면 상세 정보가 나타납니다.</div>
     `;
+    document.body.style.overflow = '';
+    const listEl = document.querySelector('.container');
+    if (listEl) listEl.style.overflow = '';
 }
 
 function copyPrompt(){
@@ -457,9 +468,9 @@ setTimeout(() => {
     let scrollLeft;
 
     mainWrapper.addEventListener('pointerdown', (e) => {
-        // 모바일/태블릿 레이아웃(세로 스택)에서는 가로 드래그 스크롤이 필요 없고,
+        // 모바일/태블릿(터치) 환경에서는 가로 드래그 스크롤이 필요 없고,
         // 모달/팝업 내부를 터치했을 때 화면이 옆으로 흔들리는 원인이 되므로 비활성화
-        if (window.matchMedia('(max-width: 1024px)').matches) return;
+        if (!window.matchMedia('(pointer: fine)').matches) return;
 
         if(e.target.closest('input') || e.target.closest('select') || e.target.closest('.sub-image-container') || e.target.closest('textarea') || e.target.closest('.modal-overlay')) return;
         
