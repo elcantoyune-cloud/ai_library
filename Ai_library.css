@@ -434,15 +434,10 @@
     gap: 12px;
 }
 
-.header h1 {
-    margin: 0;
-    line-height: 1;
-}
-
 .register-btn {
     height: 40px;
     padding: 0 15px;
-    margin-top: 0;
+    margin-top: 16px;
     border: 0;
     border-radius: 10px;
     background: #0066ff;
@@ -451,19 +446,9 @@
     font-size: 15px;
     cursor: pointer;
     white-space: nowrap;
-    transition: background 0.2s, transform 0.15s;
+    transition: background 0.2s;
 }
 .register-btn:hover {
-    background: #0052cc;
-}
-.register-btn:active {
-    transform: translateY(1px);
-}
-
-.prompt-btn {
-    background: #0066ff;
-}
-.prompt-btn:hover {
     background: #0052cc;
 }
 
@@ -708,10 +693,10 @@
 }
 
 .logout-btn {
-    height: 40px;
-    margin-top: 0;
+    height: 42px;
+    margin-top: 16px;
     padding: 0 14px;
-    border: 1px solid #dcdfe6;
+    border: 1px solid #ddd;
     border-radius: 10px;
     background: #fff;
     color: #555;
@@ -719,11 +704,9 @@
     font-size: 14px;
     cursor: pointer;
     white-space: nowrap;
-    transition: background 0.2s, border-color 0.2s;
 }
 .logout-btn:hover {
-    background: #f5f6fa;
-    border-color: #c9cde0;
+    background: #f5f5f5;
 }
 
 /* PC에서는 "등록자: · 최종 수정:" 한 줄로 표시 (기본 숨김), 모바일/태블릿 미디어쿼리에서만 줄바꿈으로 노출 */
@@ -792,7 +775,7 @@
 
     .header {
         flex-wrap: wrap;
-        row-gap: 16px;
+        row-gap: 10px;
     }
 
     .header h1 {
