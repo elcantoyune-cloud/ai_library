@@ -55,7 +55,7 @@
         }
 
         .header {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .header h1 {
@@ -445,28 +445,26 @@
     margin-top: 0;
     border: 0;
     border-radius: 10px;
-    background: #3652d9;
+    background: #0066ff;
     color: #fff;
     font-weight: 500;
     font-size: 15px;
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.2s, transform 0.15s;
-    box-shadow: 0 2px 6px rgba(54, 82, 217, 0.25);
 }
 .register-btn:hover {
-    background: #2c44b8;
+    background: #0052cc;
 }
 .register-btn:active {
     transform: translateY(1px);
 }
 
 .prompt-btn {
-    background: #5b4fd6;
-    box-shadow: 0 2px 6px rgba(91, 79, 214, 0.25);
+    background: #0066ff;
 }
 .prompt-btn:hover {
-    background: #4b3fc0;
+    background: #0052cc;
 }
 
 /* ===== 등록 모달 ===== */
