@@ -55,7 +55,7 @@
         }
 
         .header {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .header h1 {
@@ -792,7 +792,7 @@
 
     .header {
         flex-wrap: wrap;
-        row-gap: 10px;
+        row-gap: 16px;
     }
 
     .header h1 {
