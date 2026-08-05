@@ -170,6 +170,25 @@ window.allData.sort((a, b) => {
             }
         });
     }
+
+    const subImagesInput = document.getElementById('subImagesInput');
+    if (subImagesInput) {
+        subImagesInput.addEventListener('change', () => {
+            const files = Array.from(subImagesInput.files || []);
+            files.forEach(file => {
+                window.currentSubItems.push({
+                    type: 'new',
+                    file,
+                    previewUrl: URL.createObjectURL(file)
+                });
+            });
+            // 같은 파일을 다시 골라도 change가 또 발생하도록 초기화
+            subImagesInput.value = '';
+            renderSubPreviewList();
+        });
+    } else {
+        console.warn('subImagesInput 요소를 찾지 못했습니다. index.html의 id="subImagesInput" 입력을 확인해주세요.');
+    }
 });
 
 
@@ -555,25 +574,6 @@ function removeSubItem(idx) {
     if (removed && removed.type === 'new' && removed.previewUrl) URL.revokeObjectURL(removed.previewUrl);
     renderSubPreviewList();
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const subImagesInput = document.getElementById('subImagesInput');
-    if (subImagesInput) {
-        subImagesInput.addEventListener('change', () => {
-            const files = Array.from(subImagesInput.files || []);
-            files.forEach(file => {
-                window.currentSubItems.push({
-                    type: 'new',
-                    file,
-                    previewUrl: URL.createObjectURL(file)
-                });
-            });
-            // 같은 파일을 다시 골라도 change가 또 발생하도록 초기화
-            subImagesInput.value = '';
-            renderSubPreviewList();
-        });
-    }
-});
 
 function openRegisterModal(item = null) {
     const form = document.getElementById('registerForm');
