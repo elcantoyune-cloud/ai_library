@@ -280,8 +280,10 @@
 
                     <div class="form-field full">
                         <label>상세/서브 이미지 (여러 장 선택 가능)</label>
-                        <input type="file" name="subImages" accept="image/*" multiple>
+                        <input type="file" id="subImagesInput" accept="image/*" multiple>
                         <small id="subImageHint" style="display:none; color:#888;">비워두면 기존 서브 이미지를 그대로 사용합니다.</small>
+                        <small style="color:#888;">선택 후 아래에서 ▲▼로 순서를 바꾸거나 × 로 제외할 수 있습니다.</small>
+                        <div class="sub-preview-list" id="subPreviewList"></div>
                     </div>
                 </div>
 

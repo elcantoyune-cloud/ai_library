@@ -501,6 +501,80 @@ setTimeout(() => {
 
 window.editingFirebaseId = null;
 
+/* ---------------------------------------------------
+   서브 이미지 순서 조정 UI
+   - 파일 선택 순서(브라우저마다 신뢰 불가)에 의존하지 않고,
+     썸네일 미리보기 + ▲▼/× 버튼으로 순서를 직접 관리한다.
+   - window.currentSubItems 배열 각 항목:
+       { type: 'existing', url }        // 수정 모드에서 이미 저장돼 있던 이미지
+       { type: 'new', file, previewUrl } // 이번에 새로 선택한 파일
+--------------------------------------------------- */
+window.currentSubItems = [];
+
+function resetSubItems() {
+    // 새로 선택했던 파일들의 미리보기 objectURL 메모리 해제
+    (window.currentSubItems || []).forEach(it => {
+        if (it.type === 'new' && it.previewUrl) URL.revokeObjectURL(it.previewUrl);
+    });
+    window.currentSubItems = [];
+    const input = document.getElementById('subImagesInput');
+    if (input) input.value = '';
+    renderSubPreviewList();
+}
+
+function renderSubPreviewList() {
+    const container = document.getElementById('subPreviewList');
+    if (!container) return;
+    const items = window.currentSubItems;
+
+    container.innerHTML = items.map((it, idx) => {
+        const src = it.type === 'existing' ? it.url : it.previewUrl;
+        return `
+        <div class="sub-preview-item">
+            <span class="sub-preview-num">${idx + 1}</span>
+            <button type="button" class="sub-preview-remove" onclick="removeSubItem(${idx})">&times;</button>
+            <img src="${src}">
+            <div class="sub-preview-actions">
+                <button type="button" onclick="moveSubItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>&uarr;</button>
+                <button type="button" onclick="moveSubItem(${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}>&darr;</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function moveSubItem(idx, dir) {
+    const items = window.currentSubItems;
+    const target = idx + dir;
+    if (target < 0 || target >= items.length) return;
+    [items[idx], items[target]] = [items[target], items[idx]];
+    renderSubPreviewList();
+}
+
+function removeSubItem(idx) {
+    const [removed] = window.currentSubItems.splice(idx, 1);
+    if (removed && removed.type === 'new' && removed.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+    renderSubPreviewList();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const subImagesInput = document.getElementById('subImagesInput');
+    if (subImagesInput) {
+        subImagesInput.addEventListener('change', () => {
+            const files = Array.from(subImagesInput.files || []);
+            files.forEach(file => {
+                window.currentSubItems.push({
+                    type: 'new',
+                    file,
+                    previewUrl: URL.createObjectURL(file)
+                });
+            });
+            // 같은 파일을 다시 골라도 change가 또 발생하도록 초기화
+            subImagesInput.value = '';
+            renderSubPreviewList();
+        });
+    }
+});
+
 function openRegisterModal(item = null) {
     const form = document.getElementById('registerForm');
     const modalTitle = document.getElementById('registerModalTitle');
@@ -512,6 +586,7 @@ function openRegisterModal(item = null) {
 
     form.reset();
     submitBtn.disabled = false;
+    resetSubItems();
 
     if (item) {
         // 수정 모드: 기존 값 채우고, 이미지 파일은 선택 안 해도 되게 변경
@@ -527,6 +602,11 @@ function openRegisterModal(item = null) {
         fields.forEach(f => {
             if (form[f] && item[f] !== undefined) form[f].value = item[f];
         });
+
+        // 기존 서브 이미지들을 순서 조정 목록에 미리 채워둔다
+        const existingSubs = item.subImages || (item.subImage ? [item.subImage] : []);
+        window.currentSubItems = existingSubs.map(url => ({ type: 'existing', url }));
+        renderSubPreviewList();
     } else {
         window.editingFirebaseId = null;
         modalTitle.innerText = '새 항목 등록';
@@ -544,6 +624,7 @@ function closeRegisterModal() {
     window.editingFirebaseId = null;
     document.getElementById('registerModal').style.display = 'none';
     document.getElementById('registerForm').reset();
+    resetSubItems();
 }
 
 // 브라우저 기본 alert()/confirm() 대신 사이트 디자인에 맞는 커스텀 팝업
@@ -690,9 +771,11 @@ async function submitRegisterForm(event) {
     submitBtn.disabled = true;
 
     try {
-        // 파일명 기준 정렬 없이, 사용자가 클릭(선택)한 순서 그대로 사용
-        const subFiles = Array.from(form.subImages.files || []);
-        const filesToUpload = (mainFile ? 1 : 0) + subFiles.length;
+        // 서브 이미지는 미리보기 목록(window.currentSubItems)에서 사용자가
+        // 직접 지정한 순서(▲▼로 조정한 순서) 그대로 사용한다.
+        const subItems = window.currentSubItems || [];
+        const newSubCount = subItems.filter(it => it.type === 'new').length;
+        const filesToUpload = (mainFile ? 1 : 0) + newSubCount;
         let doneCount = 0;
         const updateProgress = () => {
             submitBtn.innerText = filesToUpload > 0
@@ -712,16 +795,15 @@ async function submitRegisterForm(event) {
             mainImageUrl = existing ? existing.image : '';
         }
 
-        if (subFiles.length > 0) {
-            subImageUrls = [];
-            for (const f of subFiles) {
-                const url = await uploadFileToStorage(f);
+        subImageUrls = [];
+        for (const it of subItems) {
+            if (it.type === 'existing') {
+                subImageUrls.push(it.url);
+            } else {
+                const url = await uploadFileToStorage(it.file);
                 doneCount++; updateProgress();
                 subImageUrls.push(url);
             }
-        } else {
-            const existing = window.allData.find(v => v.firebaseId === window.editingFirebaseId);
-            subImageUrls = existing ? (existing.subImages || (existing.subImage ? [existing.subImage] : [])) : [];
         }
 
         const itemData = {
