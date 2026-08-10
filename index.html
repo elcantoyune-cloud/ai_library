@@ -7,7 +7,7 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#bbcbe8">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./Ai_library.css?v=2026072603">
+<link rel="stylesheet" href="/Ai_library.css">
 <script src="./pwa-install.js"></script>
 
 <!-- Firebase (Firestore: 데이터 저장 / Auth: 로그인) -->
@@ -17,8 +17,8 @@
 <script src="./firebase-config.js"></script>
 
 <!-- Cloudinary (이미지 업로드/호스팅) -->
-<script src="./cloudinary-config.js?v=2026071604"></script>
-<script src="./Ai_library.js?v=2026072601"></script>
+<script src="./cloudinary-config.js?v=2026071603"></script>
+<script src="/Ai_library.js"></script>
 
 <div class="login-screen" id="loginScreen">
     <form class="login-box" id="loginForm" onsubmit="loginUser(event)">
@@ -28,6 +28,7 @@
         <input type="password" id="loginPassword" placeholder="비밀번호" required autocomplete="current-password">
         <button type="submit" class="search-btn" id="loginSubmitBtn">로그인</button>
         <div class="login-error" id="loginError"></div>
+        <a href="#" class="login-reset-link" id="loginResetLink" onclick="sendPasswordReset(event)">비밀번호 재설정</a>
     </form>
 </div>
 
