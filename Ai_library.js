@@ -73,6 +73,49 @@ function logoutUser() {
     window.auth.signOut().then(() => location.reload());
 }
 
+// 로그인 화면의 "비밀번호를 잊으셨나요?" 클릭 시 실행
+// 입력된 이메일로 Firebase가 비밀번호 재설정 링크 메일을 발송함
+async function sendPasswordReset(event) {
+    if (event) event.preventDefault();
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const errorEl = document.getElementById('loginError');
+    const linkEl = document.getElementById('loginResetLink');
+
+    if (!email) {
+        errorEl.style.color = '#ff3b30';
+        errorEl.innerText = '이메일을 먼저 입력해주세요.';
+        return;
+    }
+
+    if (!window.auth) {
+        errorEl.style.color = '#ff3b30';
+        errorEl.innerText = 'Firebase 설정을 불러오지 못했습니다. firebase-config.js 파일을 확인해주세요.';
+        return;
+    }
+
+    const originalText = linkEl.innerText;
+    linkEl.innerText = '전송 중...';
+
+    try {
+        await window.auth.sendPasswordResetEmail(email);
+        errorEl.style.color = '#0066ff';
+        errorEl.innerText = '비밀번호 재설정 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해주세요.';
+    } catch (err) {
+        console.error('비밀번호 재설정 오류:', err);
+        errorEl.style.color = '#ff3b30';
+        if (err.code === 'auth/user-not-found') {
+            errorEl.innerText = '등록되지 않은 이메일입니다. 관리자에게 계정 발급을 요청해주세요.';
+        } else if (err.code === 'auth/invalid-email') {
+            errorEl.innerText = '이메일 형식이 올바르지 않습니다.';
+        } else {
+            errorEl.innerText = '오류가 발생했습니다: ' + (err.message || err.code || '알 수 없는 오류');
+        }
+    } finally {
+        linkEl.innerText = originalText;
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     // 브라우저/앱 창을 닫아도 로그인 상태가 유지되도록
     // 지속성을 LOCAL로 설정 (기기에 저장되어, 로그아웃을 직접 누르기 전까지 유지됨)

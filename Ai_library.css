@@ -777,6 +777,19 @@
     min-height: 16px;
 }
 
+.login-reset-link {
+    display: block;
+    text-align: center;
+    font-size: 12.5px;
+    color: #888;
+    text-decoration: underline;
+    margin-top: -4px;
+}
+
+.login-reset-link:hover {
+    color: #0066ff;
+}
+
 .logout-btn {
     height: 42px;
     margin-top: 16px;
