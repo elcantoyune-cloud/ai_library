@@ -933,3 +933,87 @@ async function submitRegisterForm(event) {
         submitBtn.innerText = originalLabel;
     }
 }
+/* ===================== 등록 현황 대시보드 ===================== */
+function toJSDate(ts) {
+    if (!ts) return null;
+    if (typeof ts.toDate === 'function') return ts.toDate();
+    if (ts instanceof Date) return ts;
+    return null;
+}
+
+function formatDashboardDate(date) {
+    if (!date) return '-';
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+    return `${mm}.${dd} ${hh}:${mi}`;
+}
+
+// days가 null이면 전체 기간
+function getDashboardRows(days) {
+    const now = new Date();
+    const cutoff = days ? new Date(now.getTime() - days * 24 * 60 * 60 * 1000) : null;
+
+    return (window.allData || [])
+        .map(item => ({ item, date: toJSDate(item.createdAt) }))
+        .filter(({ date }) => !cutoff || (date && date >= cutoff))
+        .sort((a, b) => {
+            const ta = a.date ? a.date.getTime() : 0;
+            const tb = b.date ? b.date.getTime() : 0;
+            return tb - ta;
+        });
+}
+
+function renderDashboardStats() {
+    const weekRows = getDashboardRows(7);
+    const monthRows = getDashboardRows(30);
+    const allRows = getDashboardRows(null);
+    const registrars = new Set(allRows.map(r => r.item.createdBy).filter(Boolean));
+
+    document.getElementById('dashWeekCount').innerText = weekRows.length.toLocaleString() + '건';
+    document.getElementById('dashMonthCount').innerText = monthRows.length.toLocaleString() + '건';
+    document.getElementById('dashTotalCount').innerText = allRows.length.toLocaleString() + '건';
+    document.getElementById('dashRegistrarCount').innerText = registrars.size.toLocaleString() + '명';
+}
+
+function renderDashboardTable() {
+    const periodSelect = document.getElementById('dashPeriodSelect');
+    const days = periodSelect && periodSelect.value ? parseInt(periodSelect.value, 10) : null;
+    const rows = getDashboardRows(days);
+    const tbody = document.getElementById('dashTableBody');
+    if (!tbody) return;
+
+    if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:60px 0; color:#999;">등록된 항목이 없습니다.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = rows.map(({ item, date }) => `
+        <tr class="dash-row" onclick="handleDashboardRowClick('${item._key}')">
+            <td><img class="dash-thumb" src="${item.image || ''}" onerror="this.style.visibility='hidden'"></td>
+            <td>${item.title || '-'}</td>
+            <td>${item.brand || '-'}</td>
+            <td>${item.season || '-'}</td>
+            <td>${item.createdBy || '-'}</td>
+            <td>${formatDashboardDate(date)}</td>
+        </tr>
+    `).join('');
+}
+
+function handleDashboardRowClick(key) {
+    closeDashboard();
+    updateDetailPanel(key);
+}
+
+function openDashboard() {
+    renderDashboardStats();
+    renderDashboardTable();
+    const overlay = document.getElementById('dashboardOverlay');
+    if (overlay) overlay.style.display = 'block';
+}
+
+function closeDashboard() {
+    const overlay = document.getElementById('dashboardOverlay');
+    if (overlay) overlay.style.display = 'none';
+}

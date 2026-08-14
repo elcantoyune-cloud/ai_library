@@ -807,6 +807,23 @@
     background: #f5f5f5;
 }
 
+.header-secondary-btn {
+    height: 42px;
+    margin-top: 16px;
+    padding: 0 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    color: #555;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.header-secondary-btn:hover {
+    background: #f5f5f5;
+}
+
 /* PC에서는 "등록자: · 최종 수정:" 한 줄로 표시 (기본 숨김), 모바일/태블릿 미디어쿼리에서만 줄바꿈으로 노출 */
 .mobile-only-break {
     display: none;
@@ -970,7 +987,8 @@
     }
 
     .register-btn,
-    .logout-btn {
+    .logout-btn,
+    .header-secondary-btn {
         height: 38px;
         font-size: 13px;
         padding: 0 12px;
@@ -1023,5 +1041,141 @@
     .login-box {
         padding: 32px 22px;
         max-width: 300px;
+    }
+}
+/* ===================== 등록 현황 대시보드 ===================== */
+.dashboard-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 9999;
+    overflow-y: auto;
+}
+
+.dashboard-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+}
+
+.dashboard-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dash-back-btn {
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.dash-back-btn:hover { background: #f5f6f8; }
+
+.dashboard-title {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.dashboard-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.metric-card {
+    background: #f5f6f8;
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+
+.metric-label {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 6px;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.dashboard-list-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.dashboard-list-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.dashboard-list-head select {
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 0 12px;
+    font-size: 13.5px;
+    background: #fff;
+}
+
+.dashboard-table-wrap {
+    border: 1px solid #eee;
+    border-radius: 14px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.dashboard-table thead tr {
+    background: #f5f6f8;
+}
+
+.dashboard-table th {
+    text-align: left;
+    padding: 12px 14px;
+    color: #777;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.dashboard-table td {
+    padding: 10px 14px;
+    border-top: 1px solid #eee;
+}
+
+.dash-row { cursor: pointer; }
+.dash-row:hover { background: #fafafa; }
+
+.dash-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #eee;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .dashboard-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dashboard-inner {
+        padding: 24px 16px 60px;
     }
 }
