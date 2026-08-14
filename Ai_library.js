@@ -202,6 +202,8 @@ window.allData.sort((a, b) => {
     });
 
     renderCards(allData);
+    renderNewArrivals(allData);
+    initNewArrivalsDrag();
     document.querySelectorAll('.filter-area select').forEach(select => {
         select.addEventListener('change', applyFilters);
     });
@@ -234,6 +236,111 @@ window.allData.sort((a, b) => {
     }
 });
 
+
+// 최근 등록된(Firestore 등록 시각 기준) 항목을 상단 슬라이드에 표시
+function getRegisteredTime(item) {
+    const ts = item.createdAt || item.updatedAt;
+    if (ts) {
+        if (typeof ts.toMillis === 'function') return ts.toMillis();
+        if (typeof ts.seconds === 'number') return ts.seconds * 1000;
+    }
+    // 아직 서버 타임스탬프가 반영되지 않은(이번 세션에 막 등록한) 항목은 최상단으로
+    return Infinity;
+}
+
+function renderNewArrivals(data) {
+    const track = document.getElementById('newArrivalsTrack');
+    if (!track) return;
+
+    const items = [...data]
+        .sort((a, b) => getRegisteredTime(b) - getRegisteredTime(a))
+        .slice(0, 20);
+
+    if (items.length === 0) {
+        track.innerHTML = `<div class="na-empty">아직 등록된 항목이 없습니다.</div>`;
+        updateNaProgress();
+        return;
+    }
+
+    track.innerHTML = items.map(item => `
+        <div class="na-card" onclick="updateDetailPanel('${item._key}')">
+            <img src="${item.image}" alt="${item.title || ''}">
+            <div class="na-card-title">${item.title || ''}</div>
+        </div>
+    `).join('');
+
+    updateNaProgress();
+}
+
+// 얇은 커스텀 진행바(스크롤 위치/비율)를 실제 스크롤 상태에 맞춰 갱신
+function updateNaProgress() {
+    const track = document.getElementById('newArrivalsTrack');
+    const progress = document.getElementById('naProgress');
+    const thumb = document.getElementById('naProgressThumb');
+    if (!track || !progress || !thumb) return;
+
+    const { scrollWidth, clientWidth, scrollLeft } = track;
+
+    // 스크롤할 내용이 없으면 진행바 자체를 숨김
+    if (scrollWidth <= clientWidth + 1) {
+        progress.style.display = 'none';
+        return;
+    }
+    progress.style.display = 'block';
+
+    const widthRatio = Math.max(clientWidth / scrollWidth, 0.12);
+    const maxScroll = scrollWidth - clientWidth;
+    const leftRatio = maxScroll > 0 ? scrollLeft / maxScroll : 0;
+
+    thumb.style.width = (widthRatio * 100) + '%';
+    thumb.style.left = (leftRatio * (100 - widthRatio * 100)) + '%';
+}
+
+// 마우스 드래그로도 좌우 슬라이드 가능하게 (터치는 기본 스와이프로 동작)
+function initNewArrivalsDrag() {
+    const track = document.getElementById('newArrivalsTrack');
+    if (!track || track.dataset.dragBound) return;
+    track.dataset.dragBound = '1';
+
+    track.addEventListener('scroll', updateNaProgress);
+    window.addEventListener('resize', updateNaProgress);
+
+    let isDown = false;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+
+    track.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') return; // 터치는 네이티브 스와이프 사용
+        isDown = true;
+        moved = false;
+        startX = e.clientX;
+        startScroll = track.scrollLeft;
+        track.classList.add('dragging');
+    });
+
+    track.addEventListener('pointermove', (e) => {
+        if (!isDown) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 3) moved = true;
+        track.scrollLeft = startScroll - dx;
+    });
+
+    const endDrag = () => {
+        isDown = false;
+        track.classList.remove('dragging');
+    };
+    track.addEventListener('pointerup', endDrag);
+    track.addEventListener('pointerleave', endDrag);
+
+    // 드래그로 이동한 직후에는 카드 클릭이 열리지 않도록 방지
+    track.addEventListener('click', (e) => {
+        if (moved) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }, true);
+}
 
 function renderCards(data){
     const gallery = document.getElementById('gallery');
@@ -728,6 +835,7 @@ async function deleteItem(firebaseId) {
         window.allData = window.allData.filter(v => v.firebaseId !== firebaseId);
         applyFilters();
         showEmptyPanel();
+        renderNewArrivals(window.allData);
         customAlert('삭제되었습니다.');
     } catch (err) {
         console.error(err);
@@ -910,6 +1018,7 @@ async function submitRegisterForm(event) {
             closeRegisterModal();
             applyFilters();
             updateDetailPanel(editingId);
+            renderNewArrivals(window.allData);
         } else {
             const newFirebaseId = result.id;
             const newItem = {
@@ -924,6 +1033,7 @@ async function submitRegisterForm(event) {
             closeRegisterModal();
             applyFilters();
             updateDetailPanel(newFirebaseId);
+            renderNewArrivals(window.allData);
         }
 
     } catch (err) {
@@ -1010,10 +1120,10 @@ function openDashboard() {
     renderDashboardStats();
     renderDashboardTable();
     const overlay = document.getElementById('dashboardOverlay');
-    if (overlay) overlay.style.display = 'block';
+    if (overlay) overlay.classList.add('open');
 }
 
 function closeDashboard() {
     const overlay = document.getElementById('dashboardOverlay');
-    if (overlay) overlay.style.display = 'none';
+    if (overlay) overlay.classList.remove('open');
 }

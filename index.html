@@ -7,7 +7,7 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#bbcbe8">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./Ai_library.css?v=2026072603">
+<link rel="stylesheet" href="./Ai_library.css?v=2026072604">
 <script src="./pwa-install.js"></script>
 
 <!-- Firebase (Firestore: 데이터 저장 / Auth: 로그인) -->
@@ -17,8 +17,8 @@
 <script src="./firebase-config.js"></script>
 
 <!-- Cloudinary (이미지 업로드/호스팅) -->
-<script src="./cloudinary-config.js?v=2026071603"></script>
-<script src="./Ai_library.js?v=2026072602"></script>
+<script src="./Ai_library.js?v=2026072603"></script>
+<script src="/Ai_library.js"></script>
 
 <div class="login-screen" id="loginScreen">
     <form class="login-box" id="loginForm" onsubmit="loginUser(event)">
@@ -44,6 +44,12 @@
                 <button class="header-secondary-btn" onclick="window.open('https://claude.ai/public/artifacts/51506361-af8d-4d4e-ad5f-a81901943cd9', '_blank')">프롬프트 제작</button>
                 <button class="logout-btn" onclick="logoutUser()">로그아웃</button>
             </div>
+        </div>
+
+        <div class="new-arrivals" id="newArrivals">
+            <div class="new-arrivals-head"><span class="new-badge">NEW</span> 신규 등록</div>
+            <div class="new-arrivals-track" id="newArrivalsTrack"></div>
+            <div class="na-progress" id="naProgress"><div class="na-progress-thumb" id="naProgressThumb"></div></div>
         </div>
 
         <div class="search-wrap">
@@ -333,11 +339,12 @@
         </div>
     </div>
 
-    <div class="dashboard-overlay" id="dashboardOverlay">
+    <div class="dashboard-overlay" id="dashboardOverlay" onclick="if(event.target===this) closeDashboard()">
         <div class="dashboard-inner">
             <div class="dashboard-top">
                 <button type="button" class="dash-back-btn" onclick="closeDashboard()">&larr; 목록으로</button>
-                <h2 class="dashboard-title">등록 현황</h2>
+                <h2 class="dashboard-title">신규 등록 현황</h2>
+                <button type="button" class="dash-close-btn" onclick="closeDashboard()" aria-label="닫기">&times;</button>
             </div>
             <div class="dashboard-metrics">
                 <div class="metric-card">
