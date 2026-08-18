@@ -1079,12 +1079,16 @@ function renderDashboardStats() {
     const weekRows = getDashboardRows(7);
     const monthRows = getDashboardRows(30);
     const allRows = getDashboardRows(null);
-    const registrars = new Set(allRows.map(r => r.item.createdBy).filter(Boolean));
-
     document.getElementById('dashWeekCount').innerText = weekRows.length.toLocaleString() + '건';
     document.getElementById('dashMonthCount').innerText = monthRows.length.toLocaleString() + '건';
     document.getElementById('dashTotalCount').innerText = allRows.length.toLocaleString() + '건';
-    document.getElementById('dashRegistrarCount').innerText = registrars.size.toLocaleString() + '명';
+}
+
+// 이메일에서 @ 뒤 도메인을 잘라내고 아이디만 반환 (등록자 표시용)
+function formatRegistrarName(createdBy) {
+    if (!createdBy) return '-';
+    const at = createdBy.indexOf('@');
+    return at > -1 ? createdBy.slice(0, at) : createdBy;
 }
 
 function renderDashboardTable() {
@@ -1105,7 +1109,7 @@ function renderDashboardTable() {
             <td>${item.title || '-'}</td>
             <td>${item.brand || '-'}</td>
             <td>${item.season || '-'}</td>
-            <td>${item.createdBy || '-'}</td>
+            <td>${formatRegistrarName(item.createdBy)}</td>
             <td>${formatDashboardDate(date)}</td>
         </tr>
     `).join('');

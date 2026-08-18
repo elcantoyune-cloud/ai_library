@@ -7,7 +7,7 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#bbcbe8">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./Ai_library.css?v=2026072604">
+<link rel="stylesheet" href="./Ai_library.css?v=2026072605">
 <script src="./pwa-install.js"></script>
 
 <!-- Firebase (Firestore: 데이터 저장 / Auth: 로그인) -->
@@ -17,8 +17,8 @@
 <script src="./firebase-config.js"></script>
 
 <!-- Cloudinary (이미지 업로드/호스팅) -->
-<script src="./Ai_library.js?v=2026072603"></script>
-<script src="/Ai_library.js"></script>
+<script src="./cloudinary-config.js?v=2026071603"></script>
+<script src="./Ai_library.js?v=2026072604"></script>
 
 <div class="login-screen" id="loginScreen">
     <form class="login-box" id="loginForm" onsubmit="loginUser(event)">
@@ -37,7 +37,7 @@
     <div class="container">
         <div class="header">
             <h1>AI 비주얼 라이브러리</h1>
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:30px;">
+            <div style="display:flex; align-items:center; gap:8px;">
                 <button class="register-btn" id="installAppBtn" onclick="handleAppInstallClick()" style="display:none;">📲 앱 설치</button>
                 <button class="register-btn" onclick="openRegisterModal()">+ 새 항목 등록</button>
                 <button class="header-secondary-btn" onclick="openDashboard()">등록 현황</button>
@@ -150,6 +150,7 @@
                 <button type="button" class="modal-close" onclick="closeRegisterModal()">&times;</button>
             </div>
 
+            <div class="modal-scroll">
             <form id="registerForm" onsubmit="submitRegisterForm(event)">
                 <div class="form-grid">
                     <div class="form-field full">
@@ -313,6 +314,7 @@
                     <button type="submit" class="search-btn" id="registerSubmitBtn">등록하기</button>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 
@@ -346,6 +348,7 @@
                 <h2 class="dashboard-title">신규 등록 현황</h2>
                 <button type="button" class="dash-close-btn" onclick="closeDashboard()" aria-label="닫기">&times;</button>
             </div>
+            <div class="dashboard-scroll">
             <div class="dashboard-metrics">
                 <div class="metric-card">
                     <div class="metric-label">이번 주 등록</div>
@@ -358,10 +361,6 @@
                 <div class="metric-card">
                     <div class="metric-label">누적 등록</div>
                     <div class="metric-value" id="dashTotalCount">-</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">참여 등록자</div>
-                    <div class="metric-value" id="dashRegistrarCount">-</div>
                 </div>
             </div>
             <div class="dashboard-list-head">
@@ -386,6 +385,7 @@
                     </thead>
                     <tbody id="dashTableBody"></tbody>
                 </table>
+            </div>
             </div>
         </div>
     </div>

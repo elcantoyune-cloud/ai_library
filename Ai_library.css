@@ -4,6 +4,18 @@
             box-sizing: border-box;
         }
 
+        /* 모든 select의 기본(OS 네이티브) 화살표를 제거하고 커스텀 화살표로 통일
+           -> 라운드 border-radius가 오른쪽 끝까지 깨지지 않고 온전히 적용됨 */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+
         html {
             overflow-x: hidden;
             width: 100%;
@@ -55,7 +67,7 @@
         }
 
         .header {
-            margin-bottom: 30px;
+            margin-bottom: 14px;
         }
 
         .header h1 {
@@ -112,7 +124,7 @@
             height: 48px;
             border: 1px solid #ddd;
             border-radius: 10px;
-            padding: 0 12px;
+            padding: 0 30px 0 12px;
             background: #fff;
             font-size: 13.5px;
             width: 100%;
@@ -208,7 +220,7 @@
             background: linear-gradient(135deg, #ff5b5b, #ff3b30);
             color: #fff;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.3px;
             padding: 4px 8px;
             border-radius: 7px;
@@ -584,15 +596,25 @@
     max-width: 640px;
     max-height: 88vh;
     border-radius: 16px;
-    overflow-y: auto;
-    padding: 28px;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    padding: 24px 28px 16px;
+    flex-shrink: 0;
+}
+
+.modal-scroll {
+    overflow-y: auto;
+    padding: 0 28px 28px;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .modal-header h2 {
@@ -652,6 +674,10 @@
     font-size: 13.5px;
     font-family: inherit;
     background: #fff;
+}
+
+.form-field select {
+    padding-right: 30px;
 }
 
 .form-field input[type="file"] {
@@ -1100,10 +1126,18 @@
         max-width: 1100px;
         max-height: none;
         margin: 0 auto;
-        padding: 32px 24px 60px;
+        padding: 0;
         border-radius: 0;
         box-shadow: none;
+        overflow: visible;
+        display: block;
+    }
+    .dashboard-top {
+        padding: 32px 24px 16px;
+    }
+    .dashboard-scroll {
         overflow-y: visible;
+        padding: 0 24px 60px;
     }
     .dash-back-btn {
         display: inline-flex;
@@ -1177,8 +1211,12 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .modal-box {
-        padding: 18px;
+    .modal-header {
+        padding: 18px 18px 12px;
+    }
+
+    .modal-scroll {
+        padding: 0 18px 18px;
     }
 
     .login-box {
@@ -1187,7 +1225,6 @@
     }
 }
 /* ===================== 등록 현황 대시보드 ===================== */
-/* 기본(PC/마우스 포인터 환경): 가운데 뜨는 팝업 형태 */
 .dashboard-overlay {
     display: none;
     position: fixed;
@@ -1206,21 +1243,31 @@
 .dashboard-inner {
     position: relative;
     width: 100%;
-    max-width: 1040px;
-    max-height: 86vh;
+    max-width: 800px;
+    max-height: 80vh;
     margin: 0;
-    padding: 32px 32px 36px;
+    padding: 0;
     background: #fff;
-    border-radius: 20px;
+    border-radius: 18px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .dashboard-top {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 12px;
+    padding: 24px 30px 14px;
+    flex-shrink: 0;
+}
+
+.dashboard-scroll {
+    overflow-y: auto;
+    padding: 0 30px 30px;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .dash-back-btn {
@@ -1258,31 +1305,31 @@
 .dash-close-btn:hover { background: rgba(17, 17, 17, 0.12); }
 
 .dashboard-title {
-    font-size: 22px;
+    font-size: 17px;
     font-weight: 700;
 }
 
 .dashboard-metrics {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 28px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
 .metric-card {
     background: #f5f6f8;
-    border-radius: 12px;
-    padding: 16px 18px;
+    border-radius: 10px;
+    padding: 12px 14px;
 }
 
 .metric-label {
-    font-size: 13px;
+    font-size: 12px;
     color: #777;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .metric-value {
-    font-size: 24px;
+    font-size: 19px;
     font-weight: 700;
 }
 
@@ -1290,26 +1337,27 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 .dashboard-list-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
 }
 
 .dashboard-list-head select {
-    height: 40px;
+    height: 34px;
     border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 0 12px;
-    font-size: 13.5px;
+    border-radius: 9px;
+    padding: 0 26px 0 10px;
+    font-size: 12.5px;
     background: #fff;
+    background-size: 14px;
 }
 
 .dashboard-table-wrap {
     border: 1px solid #eee;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
     overflow-x: auto;
 }
@@ -1317,7 +1365,7 @@
 .dashboard-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13.5px;
+    font-size: 13px;
 }
 
 .dashboard-table thead tr {
@@ -1326,14 +1374,14 @@
 
 .dashboard-table th {
     text-align: left;
-    padding: 12px 14px;
+    padding: 9px 10px;
     color: #777;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .dashboard-table td {
-    padding: 10px 14px;
+    padding: 7px 5px;
     border-top: 1px solid #eee;
 }
 
@@ -1341,9 +1389,9 @@
 .dash-row:hover { background: #fafafa; }
 
 .dash-thumb {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
     object-fit: cover;
     background: #eee;
     display: block;
@@ -1351,9 +1399,12 @@
 
 @media (max-width: 768px) {
     .dashboard-metrics {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
-    .dashboard-inner {
-        padding: 24px 16px 60px;
+    .dashboard-top {
+        padding: 20px 16px 12px;
+    }
+    .dashboard-scroll {
+        padding: 0 16px 24px;
     }
 }
