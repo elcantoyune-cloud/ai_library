@@ -14,6 +14,7 @@
             background-repeat: no-repeat;
             background-position: right 10px center;
             background-size: 16px;
+            color: #111;
         }
 
         html {
@@ -1115,6 +1116,7 @@
     font-size: 12.5px;
     background: #fff;
     background-size: 14px;
+    color: #111;
 }
 
 .dashboard-table-wrap {
@@ -1457,6 +1459,7 @@
     .dashboard-list-head select {
         height: 32px;
         font-size: 12px;
+        color: #111;
     }
 
     /* 테이블 -> 카드 리스트로 재구성 */
