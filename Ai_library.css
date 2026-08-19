@@ -72,7 +72,7 @@
         }
 
         .header h1 {
-            font-size: 25px;
+            font-size: 27px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
@@ -578,9 +578,9 @@
         }
 
         .detail-group-thumb {
-            width: 54px;
-            height: 54px;
-            border-radius: 8px;
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
             object-fit: cover;
             border: 2px solid #eee;
             cursor: pointer;
@@ -1557,6 +1557,15 @@
     .info-table {
         order: 6;
         margin-top: 20px;
+        /* 모바일에서는 사각 박스 카드 느낌 대신, 위/아래 라인만 남긴 리스트 형태로 */
+        border: none;
+        border-top: 1px solid #ececec;
+        border-bottom: 1px solid #ececec;
+        border-radius: 0;
+        overflow: visible;
+    }
+    .info-row:nth-child(2n) {
+        border-left: none;
     }
     .prompt-box { order: 7; }
 
