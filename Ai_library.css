@@ -426,10 +426,9 @@
         }
 
         .panel-right h2 {
-            font-size: 20px;
+            font-size: 21px;
             font-weight: 700;
-            margin-top: 15px;
-            margin-bottom: 10px;
+            margin-top: 0px;
             flex-shrink: 0;
         }
 
@@ -448,49 +447,65 @@
         }
 
         .info-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             width: 100%;
-            margin-bottom: 10px;
-            padding: 10px;
-            flex-shrink: 0; 
+            margin-bottom: 16px;
+            border: 1px solid #efefef;
+            border-radius: 14px;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .info-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 11px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-            gap: 20px;
+            flex-direction: column;
+            gap: 3px;
+            padding: 12px 16px;
+            font-size: 13.5px;
         }
 
         .info-row strong {
-            color: #111;
-            font-weight: 500;
-            white-space: nowrap; 
-            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 400;
+            color: #a3a3a8;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
         }
 
         .info-row span {
-            color: #555;
-            text-align: right;
-            white-space: normal;  
-            word-break: break-all; 
-            max-width: 70%;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c2c2e;
+            letter-spacing: -0.01em;
+            white-space: normal;
+            word-break: break-all;
         }
 
-        
+        .info-row:nth-child(n+3) {
+            border-top: 1px solid #f3f3f3;
+        }
+        .info-row:nth-child(2n) {
+            border-left: 1px solid #f3f3f3;
+        }
+
+        .info-row.full {
+            grid-column: 1 / -1;
+            border-left: none !important;
+        }
+        .info-row.full span {
+            font-weight: 400;
+            font-size: 14px;
+            color: #2c2c2e;
+        }
 
         .info-row.performance {
-            background: #f4f7fa;
-            padding: 14px 12px;
-            border-radius: 8px;
-            margin-top: 6px;
-            border-bottom: none;
+            background: #f5f8fd;
         }
         .info-row.performance strong {
-            color: #0066ff;
-            font-weight: 700;
+            color: #999;
+            opacity: 1.0;
+            font-weight: 500;
         }
         .info-row.performance span {
             color: #0066ff;
@@ -508,15 +523,36 @@
             margin-bottom: 8px;
         }
 
+        .detail-group-thumbs-wrap {
+            position: relative;
+        }
+
         .detail-group-thumbs {
             display: flex;
             gap: 8px;
             overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .detail-group-thumbs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .group-thumbs-fade {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 56px;
+            background: linear-gradient(to right, rgba(255,255,255,0), #fff);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .2s;
         }
 
         .detail-group-thumb {
-            width: 56px;
-            height: 56px;
+            width: 70px;
+            height: 70px;
             border-radius: 10px;
             object-fit: cover;
             border: 2px solid #eee;
@@ -570,7 +606,7 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            font-weight: 700;
+            font-weight: 400;
             font-size: 14px;
             transition: background 0.2s;
         }
@@ -1480,6 +1516,17 @@
         padding: 12px 20px 60px 20px;
         overflow: visible;
     }
+
+    /* 모바일에서는 '다른 컷'을 정보표보다 위로 끌어올림 (DOM 순서는 그대로, 시각적 순서만 변경) */
+    .panel-right-header { order: 1; }
+    .panel-right-meta { order: 2; }
+    .detail-group-strip {
+        order: 3;
+        margin-top: 12px;
+        margin-bottom: 4px;
+    }
+    .info-table { order: 4; }
+    .prompt-box { order: 5; }
 
     .detail-close-btn {
         display: flex;

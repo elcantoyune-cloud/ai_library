@@ -597,18 +597,18 @@ function updateDetailPanel(key){
                 </div>
             </div>
             <div class="panel-right">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-                    <h2 style="margin-bottom:0; min-width:0; flex:1 1 auto; overflow-wrap:break-word; word-break:break-all;">${item.title}</h2>
+                <div class="panel-right-header" style="display:flex; align-items:center; gap:10px;">
+                    <h2 style="margin-bottom:0; min-width:0; overflow-wrap:break-word; word-break:break-all;">${item.title}</h2>
                     ${item.firebaseId ? `
-                        <div style="display:flex; gap:8px; flex-shrink:0; white-space:nowrap;">
-                            <button type="button" onclick="editItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:1px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:13px; font-weight:600;">수정</button>
-                            <button type="button" onclick="deleteItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:0; border-radius:8px; background:#ff3b30; color:#fff; cursor:pointer; font-size:13px; font-weight:600;">삭제</button>
+                        <div style="display:flex; gap:6px; flex-shrink:0; white-space:nowrap;">
+                            <button type="button" onclick="editItem('${item.firebaseId}')" style="height:28px; padding:0 10px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">수정</button>
+                            <button type="button" onclick="deleteItem('${item.firebaseId}')" style="height:28px; padding:0 10px; border:0; border-radius:6px; background:#ff3b30; color:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">삭제</button>
                         </div>
                     ` : ''}
                 </div>
                 ${item.firebaseId && (item.createdBy || item.updatedBy) ? `
-                    <div style="font-size:12px; color:#999; margin-top:2px;">
-                        ${item.createdBy ? `등록자: ${item.createdBy}` : ''}${item.updatedBy ? ` · 최종 수정: ${item.updatedBy}` : ''}
+                    <div class="panel-right-meta" style="font-size:14px; color:#999; margin-top:5px; margin-bottom:15px;">
+                        ${item.createdBy ? `등록자: ${item.createdBy.split('@')[0]}` : ''}${item.updatedBy ? ` · 최종 수정: ${item.updatedBy.split('@')[0]}` : ''}
                     </div>
                 ` : ''}
                 <div class="info-table">
@@ -622,9 +622,9 @@ function updateDetailPanel(key){
                     <div class="info-row"><strong>배경</strong><span>${item.background || '-'}</span></div>
                     <div class="info-row"><strong>생성부서</strong><span>${item.team || '-'}</span></div>
                     <div class="info-row"><strong>생성일</strong><span>${item.created || '-'}</span></div>
-                    <div class="info-row"><strong>이미지 경로</strong><span>${item.link || '-'}</span></div>              
-                    <div class="info-row performance"><strong>활용 내용</strong><span>${item.usedIn || '-'}</span></div>
-                    <div class="info-row performance"><strong>참고사항</strong><span>${item.reaction || '-'}</span></div>
+                    <div class="info-row full"><strong>이미지 경로</strong><span>${item.link || '-'}</span></div>              
+                    <div class="info-row full performance"><strong>활용 내용</strong><span>${item.usedIn || '-'}</span></div>
+                    <div class="info-row full performance"><strong>참고사항</strong><span>${item.reaction || '-'}</span></div>
                 </div>
                 
                 ${(() => {
@@ -633,8 +633,11 @@ function updateDetailPanel(key){
                     return `
                     <div class="detail-group-strip">
                         <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
-                        <div class="detail-group-thumbs">
-                            ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" onclick="updateDetailPanel('${v._key}')">`).join('')}
+                        <div class="detail-group-thumbs-wrap">
+                            <div class="detail-group-thumbs" id="groupThumbs" onscroll="updateGroupThumbFade(this)">
+                                ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" onclick="updateDetailPanel('${v._key}')">`).join('')}
+                            </div>
+                            <div class="group-thumbs-fade" id="groupThumbsFade"></div>
                         </div>
                     </div>`;
                 })()}
@@ -649,6 +652,22 @@ function updateDetailPanel(key){
     `;
 
     initSubSlider();
+    initGroupThumbFade();
+}
+
+// 다른 컷 썸네일 목록: 오른쪽으로 더 스크롤할 내용이 있을 때만 페이드 힌트 표시
+function updateGroupThumbFade(el) {
+    const fade = document.getElementById('groupThumbsFade');
+    if (!el || !fade) return;
+    const hasMoreToRight = el.scrollWidth - el.clientWidth - el.scrollLeft > 4;
+    fade.style.opacity = hasMoreToRight ? '1' : '0';
+}
+
+function initGroupThumbFade() {
+    const el = document.getElementById('groupThumbs');
+    if (!el) return;
+    updateGroupThumbFade(el);
+    requestAnimationFrame(() => updateGroupThumbFade(el));
 }
 
 window.currentSubIndex = 0;
