@@ -481,9 +481,9 @@ function updateDetailPanel(key){
             </div>
             <div class="panel-right">
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-                    <h2 style="margin-bottom:0;">${item.title}</h2>
+                    <h2 style="margin-bottom:0; min-width:0; flex:1 1 auto; overflow-wrap:break-word; word-break:break-all;">${item.title}</h2>
                     ${item.firebaseId ? `
-                        <div style="display:flex; gap:8px; flex-shrink:0;">
+                        <div style="display:flex; gap:8px; flex-shrink:0; white-space:nowrap;">
                             <button type="button" onclick="editItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:1px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:13px; font-weight:600;">수정</button>
                             <button type="button" onclick="deleteItem('${item.firebaseId}')" style="height:36px; padding:0 14px; border:0; border-radius:8px; background:#ff3b30; color:#fff; cursor:pointer; font-size:13px; font-weight:600;">삭제</button>
                         </div>
