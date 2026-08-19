@@ -201,7 +201,7 @@ window.allData.sort((a, b) => {
         item.id = index + 1;
     });
 
-    renderCards(allData);
+    renderGroupedCards(allData);
     renderNewArrivals(allData);
     initNewArrivalsDrag();
     document.querySelectorAll('.filter-area select').forEach(select => {
@@ -233,6 +233,29 @@ window.allData.sort((a, b) => {
         });
     } else {
         console.warn('subImagesInput 요소를 찾지 못했습니다. index.html의 id="subImagesInput" 입력을 확인해주세요.');
+    }
+
+    // 대표 이미지: 신규 등록 모드에서는 여러 장을 누적 선택해 같은 품번의
+    // variation(포즈/컷)으로 묶어 등록할 수 있게 한다. 수정 모드에서는
+    // 기존처럼 파일 1장을 그대로 교체하는 단순 방식을 유지한다.
+    const mainImageInputEl = document.getElementById('mainImageInput');
+    if (mainImageInputEl) {
+        mainImageInputEl.addEventListener('change', () => {
+            if (window.editingFirebaseId) return; // 수정 모드는 기존 단일 이미지 교체 로직 그대로 사용
+            const files = Array.from(mainImageInputEl.files || []);
+            files.forEach(file => {
+                window.currentMainItems.push({
+                    type: 'new',
+                    file,
+                    previewUrl: URL.createObjectURL(file),
+                    prompt: ''
+                });
+            });
+            mainImageInputEl.value = '';
+            renderMainPreviewList();
+        });
+    } else {
+        console.warn('mainImageInput 요소를 찾지 못했습니다.');
     }
 });
 
@@ -342,6 +365,37 @@ function initNewArrivalsDrag() {
     }, true);
 }
 
+// item.groupId가 있으면 그 값을, 없으면 자기 자신의 _key를 그룹 키로 사용
+// (그룹핑 기능이 생기기 전에 등록된 기존 데이터도 자연스럽게 "1개짜리 그룹"으로 취급됨)
+function getGroupKey(item) {
+    return item.groupId || item._key;
+}
+
+// window.allData 전체에서 item과 같은 그룹(같은 품번의 variation들)을
+// groupOrder 순서로 정렬해 반환. 그룹핑 안 된 항목은 자기 자신만 담긴 배열.
+function getGroupSiblings(item) {
+    const gKey = getGroupKey(item);
+    return (window.allData || [])
+        .filter(v => getGroupKey(v) === gKey)
+        .sort((a, b) => (a.groupOrder ?? 0) - (b.groupOrder ?? 0));
+}
+
+// data를 그룹 단위로 묶는다. data의 등장 순서를 유지하면서, 각 그룹은
+// 처음 등장하는 위치를 대표 위치로 삼는다.
+function groupItems(data) {
+    const seen = new Set();
+    const groups = [];
+    data.forEach(item => {
+        const gKey = getGroupKey(item);
+        if (seen.has(gKey)) return;
+        seen.add(gKey);
+        groups.push(getGroupSiblings(item));
+    });
+    return groups;
+}
+
+// 검색/필터 결과 표시용: variation(개별 item) 단위로 카드 하나씩 노출.
+// 같은 품번의 다른 포즈가 있으면 카드 하단에 링크로 안내한다.
 function renderCards(data){
     const gallery = document.getElementById('gallery');
     const resultCount = document.getElementById('resultCount');
@@ -355,6 +409,7 @@ function renderCards(data){
     }
 
     data.forEach(item=>{
+        const siblingCount = getGroupSiblings(item).length - 1;
         gallery.innerHTML += `
         <div class="card" id="card-${item._key}" onclick="updateDetailPanel('${item._key}')">
             <img src="${item.image}">
@@ -365,10 +420,63 @@ function renderCards(data){
                     <span>#${item.background}</span>
                     <span>#${item.tool}</span>
                 </div>
+                ${siblingCount > 0 ? `<div class="card-group-link">같은 제품의 다른 컷 보기 (${siblingCount})</div>` : ''}
             </div>
         </div>
         `;
     });
+}
+
+// 기본(필터 없는) 목록 표시용: 같은 품번의 variation들을 카드 1개로 묶어서
+// 보여준다. 대표 이미지는 groupOrder가 가장 앞선 것을 사용하고, variation이
+// 여러 장이면 뱃지를 눌러 나머지 썸네일을 펼쳐볼 수 있다.
+function renderGroupedCards(data) {
+    const gallery = document.getElementById('gallery');
+    const resultCount = document.getElementById('resultCount');
+
+    const groups = groupItems(data);
+
+    gallery.innerHTML = '';
+    resultCount.innerText = `총 ${groups.length.toLocaleString()}건의 결과`;
+
+    if (groups.length === 0) {
+        gallery.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 80px 0; color: #999; font-size: 14px;">검색 결과가 없습니다.</div>`;
+        return;
+    }
+
+    groups.forEach(group => {
+        const rep = group[0];
+        gallery.innerHTML += `
+        <div class="card" id="card-${rep._key}" onclick="updateDetailPanel('${rep._key}')">
+            <div class="card-img-wrap">
+                <img src="${rep.image}">
+                ${group.length > 1 ? `
+                <span class="group-badge" onclick="event.stopPropagation(); toggleGroupStrip(this)">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    ${group.length}종
+                </span>` : ''}
+            </div>
+            <div class="card-body">
+                <div class="card-title">${rep.title}</div>
+                <div class="card-product">${rep.brand} · ${rep.gender} · ${rep.category}<br>${rep.season}</div>
+                <div class="card-tags">
+                    <span>#${rep.background}</span>
+                    <span>#${rep.tool}</span>
+                </div>
+                ${group.length > 1 ? `
+                <div class="group-thumb-strip">
+                    ${group.map(v => `<img class="group-thumb" src="${v.image}" onclick="event.stopPropagation(); updateDetailPanel('${v._key}')">`).join('')}
+                </div>` : ''}
+            </div>
+        </div>
+        `;
+    });
+}
+
+// 그룹 카드의 "N종" 뱃지를 클릭하면 나머지 variation 썸네일이 펼쳐짐
+function toggleGroupStrip(badgeEl) {
+    const card = badgeEl.closest('.card');
+    if (card) card.classList.toggle('group-open');
 }
 
 
@@ -383,6 +491,11 @@ function applyFilters(){
     const season = document.getElementById('season').value;
     const background = document.getElementById('background').value;
     const tool = document.getElementById('tool') ? document.getElementById('tool').value : '';
+
+    // 검색어나 필터가 하나라도 걸려있으면 "찾는 그 컷"이 바로 보이도록
+    // variation 단위(개별)로 노출하고, 아무 조건도 없는 기본 목록에서는
+    // 같은 품번끼리 카드 1개로 묶어서 보여준다.
+    const hasActiveFilter = !!(keyword.trim() || type || usage || team || brand || gender || category || season || background || tool);
 
     /*검색 필터*/
     const result = allData.filter(item=>{
@@ -407,7 +520,11 @@ function applyFilters(){
             && (!tool || item.tool === tool);
     });
 
-    renderCards(result);
+    if (hasActiveFilter) {
+        renderCards(result);
+    } else {
+        renderGroupedCards(result);
+    }
     document.getElementById('gallery').style.display = 'grid';
     document.getElementById('resultCount').style.display = 'block';
     showEmptyPanel(); 
@@ -415,7 +532,7 @@ function applyFilters(){
 function resetFilters(){
     document.getElementById('searchInput').value = '';
     document.querySelectorAll('.filter-area select').forEach(select => select.value = '');
-    renderCards(allData); 
+    renderGroupedCards(allData); 
     
     document.getElementById('gallery').style.display = 'none';
     document.getElementById('resultCount').style.display = 'none';
@@ -510,6 +627,18 @@ function updateDetailPanel(key){
                     <div class="info-row performance"><strong>참고사항</strong><span>${item.reaction || '-'}</span></div>
                 </div>
                 
+                ${(() => {
+                    const siblings = getGroupSiblings(item);
+                    if (siblings.length <= 1) return '';
+                    return `
+                    <div class="detail-group-strip">
+                        <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
+                        <div class="detail-group-thumbs">
+                            ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" onclick="updateDetailPanel('${v._key}')">`).join('')}
+                        </div>
+                    </div>`;
+                })()}
+
                 <div class="prompt-box">
                     <h3>Prompt</h3>
                     <textarea readonly id="promptText">${item.prompt || ''}</textarea>
@@ -725,6 +854,74 @@ function removeSubItem(idx) {
     renderSubPreviewList();
 }
 
+/* ---------------------------------------------------
+   대표 이미지 다중 선택 (variation 등록) UI
+   - 신규 등록 시에만 사용. 같은 품번의 여러 포즈/컷 이미지를
+     한 번에 선택하고, 이미지마다 다른 프롬프트를 입력할 수 있다.
+   - window.currentMainItems 배열 각 항목:
+       { type: 'new', file, previewUrl, prompt }
+--------------------------------------------------- */
+window.currentMainItems = [];
+
+function resetMainItems() {
+    (window.currentMainItems || []).forEach(it => {
+        if (it.type === 'new' && it.previewUrl) URL.revokeObjectURL(it.previewUrl);
+    });
+    window.currentMainItems = [];
+    const input = document.getElementById('mainImageInput');
+    if (input) input.value = '';
+    renderMainPreviewList();
+}
+
+function renderMainPreviewList() {
+    const container = document.getElementById('mainPreviewList');
+    if (!container) return;
+    const items = window.currentMainItems || [];
+
+    // 수정 모드(단일 이미지 교체 방식)에서는 이 프리뷰 목록을 쓰지 않는다.
+    if (window.editingFirebaseId || items.length === 0) {
+        container.innerHTML = '';
+        container.style.display = 'none';
+        return;
+    }
+    container.style.display = 'flex';
+
+    container.innerHTML = items.map((it, idx) => `
+        <div class="main-preview-item">
+            <div class="main-preview-thumb">
+                <span class="main-preview-num">${idx + 1}</span>
+                <button type="button" class="main-preview-remove" onclick="removeMainItem(${idx})">&times;</button>
+                <img src="${it.previewUrl}">
+                <div class="main-preview-actions">
+                    <button type="button" onclick="moveMainItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>&uarr;</button>
+                    <button type="button" onclick="moveMainItem(${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}>&darr;</button>
+                </div>
+            </div>
+            <textarea class="main-preview-prompt" placeholder="이 이미지만의 프롬프트 (비워두면 위쪽 공통 프롬프트 사용)" oninput="updateMainItemPrompt(${idx}, this.value)">${it.prompt || ''}</textarea>
+        </div>
+    `).join('');
+}
+
+function moveMainItem(idx, dir) {
+    const items = window.currentMainItems;
+    const target = idx + dir;
+    if (target < 0 || target >= items.length) return;
+    [items[idx], items[target]] = [items[target], items[idx]];
+    renderMainPreviewList();
+}
+
+function removeMainItem(idx) {
+    const [removed] = window.currentMainItems.splice(idx, 1);
+    if (removed && removed.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+    renderMainPreviewList();
+}
+
+// 텍스트를 입력할 때마다 목록 전체를 다시 그리면 입력 포커스가 끊기므로,
+// 데이터만 갱신하고 화면(textarea)은 그대로 둔다.
+function updateMainItemPrompt(idx, value) {
+    if (window.currentMainItems[idx]) window.currentMainItems[idx].prompt = value;
+}
+
 function openRegisterModal(item = null) {
     const form = document.getElementById('registerForm');
     const modalTitle = document.getElementById('registerModalTitle');
@@ -732,20 +929,30 @@ function openRegisterModal(item = null) {
     const mainImageLabel = document.getElementById('mainImageLabel');
     const mainImageInput = document.getElementById('mainImageInput');
     const mainImageHint = document.getElementById('mainImageHint');
+    const mainImageMultiHint = document.getElementById('mainImageMultiHint');
+    const promptHint = document.getElementById('promptHint');
     const subImageHint = document.getElementById('subImageHint');
 
     form.reset();
     submitBtn.disabled = false;
+    window.editingFirebaseId = item ? item.firebaseId : null; // resetMainItems보다 먼저 설정(프리뷰 표시 여부 판단에 사용)
     resetSubItems();
+    resetMainItems();
+
+    // 대표 이미지는 required 속성 대신 submitRegisterForm에서 직접 검증한다.
+    // (신규 등록은 누적 선택 방식이라 선택 직후 input.value를 비우기 때문에
+    //  네이티브 required 검증이 오작동함)
+    mainImageInput.required = false;
 
     if (item) {
         // 수정 모드: 기존 값 채우고, 이미지 파일은 선택 안 해도 되게 변경
-        window.editingFirebaseId = item.firebaseId;
         modalTitle.innerText = '항목 수정';
         submitBtn.innerText = '수정하기';
         mainImageLabel.innerText = '대표 이미지';
-        mainImageInput.required = false;
+        mainImageInput.multiple = false;
         mainImageHint.style.display = 'block';
+        mainImageMultiHint.style.display = 'none';
+        promptHint.style.display = 'none';
         subImageHint.style.display = 'block';
 
         const fields = ['title','type','team','brand','gender','category','season','background','tool','created','link','usage','usedIn','reaction','prompt'];
@@ -758,12 +965,13 @@ function openRegisterModal(item = null) {
         window.currentSubItems = existingSubs.map(url => ({ type: 'existing', url }));
         renderSubPreviewList();
     } else {
-        window.editingFirebaseId = null;
         modalTitle.innerText = '새 항목 등록';
         submitBtn.innerText = '등록하기';
         mainImageLabel.innerText = '대표 이미지 *';
-        mainImageInput.required = true;
+        mainImageInput.multiple = true;
         mainImageHint.style.display = 'none';
+        mainImageMultiHint.style.display = 'block';
+        promptHint.style.display = 'block';
         subImageHint.style.display = 'none';
     }
 
@@ -775,6 +983,7 @@ function closeRegisterModal() {
     document.getElementById('registerModal').style.display = 'none';
     document.getElementById('registerForm').reset();
     resetSubItems();
+    resetMainItems();
 }
 
 // 브라우저 기본 alert()/confirm() 대신 사이트 디자인에 맞는 커스텀 팝업
@@ -906,6 +1115,14 @@ async function uploadFileToStorage(file) {
     return data.secure_url;
 }
 
+function buildTimeoutPromise() {
+    return new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(
+            'Firestore 응답이 30초 넘게 없습니다. 사내망 방화벽/프록시가 연결을 막고 있을 수 있습니다. 다른 네트워크(개인 핫스팟 등)에서 다시 시도해보세요.'
+        )), 30000)
+    );
+}
+
 async function submitRegisterForm(event) {
     event.preventDefault();
     const form = event.target;
@@ -913,17 +1130,19 @@ async function submitRegisterForm(event) {
     const originalLabel = submitBtn.innerText;
     const isEditing = !!window.editingFirebaseId;
 
-    const mainFile = form.mainImage.files[0];
-    if (!isEditing && !mainFile) {
-        customAlert('대표 이미지를 선택해주세요.');
-        return;
+    if (isEditing) {
+        await submitEditForm(form, submitBtn, originalLabel);
+    } else {
+        await submitNewRegistration(form, submitBtn, originalLabel);
     }
+}
 
+/* ---------- 수정: 기존 방식 그대로, variation(문서) 1건 단위 ---------- */
+async function submitEditForm(form, submitBtn, originalLabel) {
+    const mainFile = form.mainImage.files[0];
     submitBtn.disabled = true;
 
     try {
-        // 서브 이미지는 미리보기 목록(window.currentSubItems)에서 사용자가
-        // 직접 지정한 순서(▲▼로 조정한 순서) 그대로 사용한다.
         const subItems = window.currentSubItems || [];
         const newSubCount = subItems.filter(it => it.type === 'new').length;
         const filesToUpload = (mainFile ? 1 : 0) + newSubCount;
@@ -935,9 +1154,7 @@ async function submitRegisterForm(event) {
         };
         updateProgress();
 
-        // 새로 선택한 이미지가 있으면 업로드, 없으면(수정 모드) 기존 값 유지
-        let mainImageUrl, subImageUrls;
-
+        let mainImageUrl;
         if (mainFile) {
             mainImageUrl = await uploadFileToStorage(mainFile);
             doneCount++; updateProgress();
@@ -946,7 +1163,7 @@ async function submitRegisterForm(event) {
             mainImageUrl = existing ? existing.image : '';
         }
 
-        subImageUrls = [];
+        const subImageUrls = [];
         for (const it of subItems) {
             if (it.type === 'existing') {
                 subImageUrls.push(it.url);
@@ -978,67 +1195,151 @@ async function submitRegisterForm(event) {
         };
 
         submitBtn.innerText = '정보 저장 중...';
-
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error(
-                'Firestore 응답이 30초 넘게 없습니다. 사내망 방화벽/프록시가 연결을 막고 있을 수 있습니다. 다른 네트워크(개인 핫스팟 등)에서 다시 시도해보세요.'
-            )), 30000)
-        );
-
         const editingId = window.editingFirebaseId; // closeRegisterModal이 초기화하기 전에 미리 저장
 
-        const savePromise = isEditing
-            ? window.db.collection('gallery_items').doc(editingId).update({
-                  ...itemData,
-                  updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  updatedBy: window.currentUser ? window.currentUser.email : null
-              })
-            : window.db.collection('gallery_items').add({
-                  ...itemData,
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  createdBy: window.currentUser ? window.currentUser.email : null
-              });
-
-        const result = await Promise.race([savePromise, timeoutPromise]);
-
-        await customAlert(isEditing ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.');
-
-        if (isEditing) {
-            const idx = window.allData.findIndex(v => v.firebaseId === editingId);
-            if (idx !== -1) {
-                window.allData[idx] = {
-                    ...window.allData[idx],
-                    ...itemData,
-                    updatedBy: window.currentUser ? window.currentUser.email : null,
-                    _key: editingId
-                };
-            }
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalLabel;
-            closeRegisterModal();
-            applyFilters();
-            updateDetailPanel(editingId);
-            renderNewArrivals(window.allData);
-        } else {
-            const newFirebaseId = result.id;
-            const newItem = {
+        // .update()는 지정한 필드만 갱신하는 부분 병합이라, 문서에 이미
+        // groupId/groupOrder가 있어도 그대로 유지된다(따로 손댈 필요 없음).
+        await Promise.race([
+            window.db.collection('gallery_items').doc(editingId).update({
                 ...itemData,
-                firebaseId: newFirebaseId,
-                _key: newFirebaseId,
-                createdBy: window.currentUser ? window.currentUser.email : null
-            };
-            window.allData.unshift(newItem);
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalLabel;
-            closeRegisterModal();
-            applyFilters();
-            updateDetailPanel(newFirebaseId);
-            renderNewArrivals(window.allData);
-        }
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: window.currentUser ? window.currentUser.email : null
+            }),
+            buildTimeoutPromise()
+        ]);
 
+        await customAlert('수정이 완료되었습니다.');
+
+        const idx = window.allData.findIndex(v => v.firebaseId === editingId);
+        if (idx !== -1) {
+            window.allData[idx] = {
+                ...window.allData[idx],
+                ...itemData,
+                updatedBy: window.currentUser ? window.currentUser.email : null,
+                _key: editingId
+            };
+        }
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalLabel;
+        closeRegisterModal();
+        applyFilters();
+        updateDetailPanel(editingId);
+        renderNewArrivals(window.allData);
     } catch (err) {
         console.error(err);
-        customAlert((isEditing ? '수정' : '등록') + ' 중 오류가 발생했습니다.\n' + err.message);
+        customAlert('수정 중 오류가 발생했습니다.\n' + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalLabel;
+    }
+}
+
+/* ---------- 신규 등록: 대표 이미지를 여러 장 고르면 같은 품번의
+   variation(포즈/컷)으로 묶어 문서를 여러 개 생성한다ㅡ
+   공통 정보/서브 이미지는 그대로 복제, 프롬프트만 이미지별로 다를 수 있음 ---------- */
+async function submitNewRegistration(form, submitBtn, originalLabel) {
+    const mainItems = window.currentMainItems || [];
+    if (mainItems.length === 0) {
+        customAlert('대표 이미지를 선택해주세요.');
+        return;
+    }
+
+    submitBtn.disabled = true;
+
+    try {
+        const subItems = window.currentSubItems || [];
+        const newSubCount = subItems.filter(it => it.type === 'new').length;
+        const filesToUpload = mainItems.length + newSubCount;
+        let doneCount = 0;
+        const updateProgress = () => {
+            submitBtn.innerText = filesToUpload > 0
+                ? `업로드 중... (${doneCount}/${filesToUpload})`
+                : '저장 중...';
+        };
+        updateProgress();
+
+        // 서브 이미지(참고 이미지)는 품번 전체가 공통으로 사용
+        const subImageUrls = [];
+        for (const it of subItems) {
+            if (it.type === 'existing') {
+                subImageUrls.push(it.url);
+            } else {
+                const url = await uploadFileToStorage(it.file);
+                doneCount++; updateProgress();
+                subImageUrls.push(url);
+            }
+        }
+
+        const commonPrompt = form.prompt.value.trim();
+        const baseData = {
+            title: form.title.value.trim(),
+            type: form.type.value,
+            team: form.team.value,
+            brand: form.brand.value,
+            gender: form.gender.value,
+            category: form.category.value,
+            season: form.season.value,
+            background: form.background.value,
+            tool: form.tool.value,
+            created: form.created.value,
+            link: form.link.value.trim(),
+            usage: form.usage.value,
+            usedIn: form.usedIn.value.trim(),
+            reaction: form.reaction.value.trim(),
+            subImages: subImageUrls,
+        };
+
+        // 이미지가 2장 이상일 때만 groupId를 발급해 묶는다.
+        // 1장짜리는 기존과 동일하게 단독 항목으로 저장.
+        const groupId = mainItems.length > 1
+            ? (Date.now().toString(36) + Math.random().toString(36).slice(2, 8))
+            : null;
+
+        submitBtn.innerText = '정보 저장 중...';
+
+        const newItems = [];
+        for (let i = 0; i < mainItems.length; i++) {
+            const mi = mainItems[i];
+            const mainImageUrl = await uploadFileToStorage(mi.file);
+            doneCount++; updateProgress();
+
+            const itemData = {
+                ...baseData,
+                prompt: (mi.prompt && mi.prompt.trim()) || commonPrompt,
+                image: mainImageUrl,
+                ...(groupId ? { groupId, groupOrder: i } : {}),
+            };
+
+            const result = await Promise.race([
+                window.db.collection('gallery_items').add({
+                    ...itemData,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: window.currentUser ? window.currentUser.email : null
+                }),
+                buildTimeoutPromise()
+            ]);
+
+            newItems.push({
+                ...itemData,
+                firebaseId: result.id,
+                _key: result.id,
+                createdBy: window.currentUser ? window.currentUser.email : null
+            });
+        }
+
+        await customAlert(newItems.length > 1
+            ? `${newItems.length}건의 포즈/컷이 한 품번으로 등록되었습니다.`
+            : '등록이 완료되었습니다.');
+
+        window.allData.unshift(...newItems);
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalLabel;
+        closeRegisterModal();
+        applyFilters();
+        updateDetailPanel(newItems[0]._key);
+        renderNewArrivals(window.allData);
+    } catch (err) {
+        console.error(err);
+        customAlert('등록 중 오류가 발생했습니다.\n' + err.message);
         submitBtn.disabled = false;
         submitBtn.innerText = originalLabel;
     }
@@ -1075,10 +1376,26 @@ function getDashboardRows(days) {
         });
 }
 
+// 문서(variation) 단위 목록을 groupId 기준으로 묶어, 대표 항목 1개 + 개수로 만든다.
+// (등록 현황은 "품번이 몇 건 등록됐는지"가 자연스러운 단위라 variation이 아닌 그룹으로 센다)
+function getDashboardGroupRows(days) {
+    const rows = getDashboardRows(days);
+    const seen = new Set();
+    const grouped = [];
+    rows.forEach(({ item, date }) => {
+        const gKey = getGroupKey(item);
+        if (seen.has(gKey)) return;
+        seen.add(gKey);
+        const siblings = getGroupSiblings(item);
+        grouped.push({ item: siblings[0] || item, date, count: siblings.length });
+    });
+    return grouped;
+}
+
 function renderDashboardStats() {
-    const weekRows = getDashboardRows(7);
-    const monthRows = getDashboardRows(30);
-    const allRows = getDashboardRows(null);
+    const weekRows = getDashboardGroupRows(7);
+    const monthRows = getDashboardGroupRows(30);
+    const allRows = getDashboardGroupRows(null);
     document.getElementById('dashWeekCount').innerText = weekRows.length.toLocaleString() + '건';
     document.getElementById('dashMonthCount').innerText = monthRows.length.toLocaleString() + '건';
     document.getElementById('dashTotalCount').innerText = allRows.length.toLocaleString() + '건';
@@ -1094,7 +1411,7 @@ function formatRegistrarName(createdBy) {
 function renderDashboardTable() {
     const periodSelect = document.getElementById('dashPeriodSelect');
     const days = periodSelect && periodSelect.value ? parseInt(periodSelect.value, 10) : null;
-    const rows = getDashboardRows(days);
+    const rows = getDashboardGroupRows(days);
     const tbody = document.getElementById('dashTableBody');
     if (!tbody) return;
 
@@ -1103,10 +1420,10 @@ function renderDashboardTable() {
         return;
     }
 
-    tbody.innerHTML = rows.map(({ item, date }) => `
+    tbody.innerHTML = rows.map(({ item, date, count }) => `
         <tr class="dash-row" onclick="handleDashboardRowClick('${item._key}')">
             <td><img class="dash-thumb" src="${item.image || ''}" onerror="this.style.visibility='hidden'"></td>
-            <td>${item.title || '-'}</td>
+            <td>${item.title || '-'}${count > 1 ? ` <span class="dash-count-badge">${count}종</span>` : ''}</td>
             <td>${item.brand || '-'}</td>
             <td>${item.season || '-'}</td>
             <td>${formatRegistrarName(item.createdBy)}</td>

@@ -7,7 +7,7 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#bbcbe8">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./Ai_library.css?v=2026081801">
+<link rel="stylesheet" href="./Ai_library.css?v=2026081802">
 <script src="./pwa-install.js"></script>
 
 <!-- Firebase (Firestore: 데이터 저장 / Auth: 로그인) -->
@@ -18,7 +18,8 @@
 
 <!-- Cloudinary (이미지 업로드/호스팅) -->
 <script src="./cloudinary-config.js?v=2026071603"></script>
-<script src="./Ai_library.js?v=2026081801"></script>
+<script src="./Ai_library.js?v=2026081802"></script>
+
 
 <div class="login-screen" id="loginScreen">
     <form class="login-box" id="loginForm" onsubmit="loginUser(event)">
@@ -230,8 +231,8 @@
                             <option>25 AUTUMN</option>
                             <option>25 WINTER</option>
                             <option>26 SPRING</option>
-                            <option selected>26 SUMMER</option>
-                            <option>26 AUTUMN</option>
+                            <option>26 SUMMER</option>
+                            <option selected>26 AUTUMN</option>
                             <option>26 WINTER</option>
                         </select>
                     </div>
@@ -239,8 +240,8 @@
                     <div class="form-field">
                         <label>장소 컨셉 *</label>
                         <select name="background" required>
-                            <option value="야외">야외</option>
                             <option value="스튜디오">스튜디오</option>
+                            <option value="야외">야외</option>
                         </select>
                     </div>
 
@@ -290,14 +291,17 @@
                     </div>
 
                     <div class="form-field full">
-                        <label>Prompt</label>
+                        <label id="promptLabel">Prompt</label>
                         <textarea name="prompt" rows="4" placeholder="프롬프트를 입력해 주세요"></textarea>
+                        <small id="promptHint" style="display:none; color:#888;">아래에서 이미지별로 프롬프트를 따로 입력하지 않으면 이 내용이 공통으로 사용됩니다.</small>
                     </div>
 
                     <div class="form-field full">
                         <label id="mainImageLabel">대표 이미지 *</label>
-                        <input type="file" id="mainImageInput" name="mainImage" accept="image/*" required>
+                        <input type="file" id="mainImageInput" name="mainImage" accept="image/*" multiple required>
                         <small id="mainImageHint" style="display:none; color:#888;">비워두면 기존 이미지를 그대로 사용합니다.</small>
+                        <small id="mainImageMultiHint" style="display:none; color:#888;">같은 제품의 다른 포즈/컷을 여러 장 선택하면 한 품번으로 묶여 등록됩니다. 이미지마다 프롬프트를 다르게 입력할 수 있어요.</small>
+                        <div class="main-preview-list" id="mainPreviewList"></div>
                     </div>
 
                     <div class="form-field full">
