@@ -275,22 +275,37 @@ function renderNewArrivals(data) {
     const track = document.getElementById('newArrivalsTrack');
     if (!track) return;
 
-    const items = [...data]
-        .sort((a, b) => getRegisteredTime(b) - getRegisteredTime(a))
-        .slice(0, 20);
+    // 최근 등록 시각 기준으로 정렬한 뒤, 같은 품번(그룹)은 하나로 묶어서
+    // 대표 이미지 1장 + "N종" 뱃지로만 보여준다 (variation마다 카드가 퍼지지 않도록).
+    const sorted = [...data].sort((a, b) => getRegisteredTime(b) - getRegisteredTime(a));
+    const seen = new Set();
+    const groups = [];
+    for (const item of sorted) {
+        const gKey = getGroupKey(item);
+        if (seen.has(gKey)) continue;
+        seen.add(gKey);
+        groups.push(getGroupSiblings(item));
+        if (groups.length >= 20) break;
+    }
 
-    if (items.length === 0) {
+    if (groups.length === 0) {
         track.innerHTML = `<div class="na-empty">아직 등록된 항목이 없습니다.</div>`;
         updateNaProgress();
         return;
     }
 
-    track.innerHTML = items.map(item => `
-        <div class="na-card" onclick="updateDetailPanel('${item._key}')">
-            <img src="${item.image}" alt="${item.title || ''}">
-            <div class="na-card-title">${item.title || ''}</div>
+    track.innerHTML = groups.map(group => {
+        const rep = group[0];
+        return `
+        <div class="na-card" onclick="updateDetailPanel('${rep._key}')">
+            <div class="na-card-img-wrap">
+                <img src="${rep.image}" alt="${rep.title || ''}">
+                ${group.length > 1 ? `<span class="na-badge">${group.length}종</span>` : ''}
+            </div>
+            <div class="na-card-title">${rep.title || ''}</div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     updateNaProgress();
 }
@@ -597,7 +612,7 @@ function updateDetailPanel(key){
                 </div>
             </div>
             <div class="panel-right">
-                <div class="panel-right-header" style="display:flex; align-items:center; gap:10px;">
+                <div class="panel-right-header">
                     <h2 style="margin-bottom:0; min-width:0; overflow-wrap:break-word; word-break:break-all;">${item.title}</h2>
                     ${item.firebaseId ? `
                         <div style="display:flex; gap:6px; flex-shrink:0; white-space:nowrap;">
