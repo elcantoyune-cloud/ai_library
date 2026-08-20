@@ -677,11 +677,12 @@ function applyDetailPanelItem(item) {
     }
 
     const groupStripArea = document.getElementById('groupStripArea');
+    const groupSiblingsCount = groupStripArea ? getGroupSiblings(item).length : 0;
     if (groupStripArea) {
-        const siblings = getGroupSiblings(item);
-        if (siblings.length <= 1) {
+        if (groupSiblingsCount <= 1) {
             groupStripArea.innerHTML = '';
         } else {
+            const siblings = getGroupSiblings(item);
             groupStripArea.innerHTML = `
             <div class="detail-group-strip">
                 <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
@@ -695,6 +696,15 @@ function applyDetailPanelItem(item) {
             initGroupThumbFade();
             initGroupThumbsDrag();
         }
+    }
+
+    // 모바일: "같은 제품 다른 컷"과 "서브 이미지"가 둘 다 있을 때만
+    // 좌(다른 컷)/우(서브 이미지) 나란히 배치(media-split)한다.
+    // 둘 중 하나만 있으면 기존처럼 한 줄 전체 폭을 그대로 사용한다.
+    const panelContentEl2 = document.querySelector('.panel-content');
+    if (panelContentEl2) {
+        const hasSubImages = !!document.getElementById('subImageContainer');
+        panelContentEl2.classList.toggle('media-split', groupSiblingsCount > 1 && hasSubImages);
     }
 }
 
