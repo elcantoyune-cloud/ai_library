@@ -126,7 +126,7 @@
             border: 1px solid #ddd;
             border-radius: 10px;
             padding: 0 30px 0 12px;
-            background: #fff;
+            background-color: #fff;
             font-size: 13px;
             font-weight:500;
             width: 100%;
@@ -560,6 +560,7 @@
             overflow-x: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            cursor: grab;
         }
         .detail-group-thumbs::-webkit-scrollbar {
             display: none;
@@ -839,7 +840,7 @@
     border-radius: 8px;
     font-size: 13.5px;
     font-family: inherit;
-    background: #fff;
+    background-color: #fff;
 }
 
 .form-field select {
@@ -1391,7 +1392,7 @@
     border-radius: 9px;
     padding: 0 26px 0 10px;
     font-size: 12.5px;
-    background: #fff;
+    background-color: #fff;
     background-size: 14px;
     color: #111;
 }

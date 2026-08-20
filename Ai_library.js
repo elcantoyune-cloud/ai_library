@@ -235,13 +235,14 @@ window.allData.sort((a, b) => {
         console.warn('subImagesInput 요소를 찾지 못했습니다. index.html의 id="subImagesInput" 입력을 확인해주세요.');
     }
 
-    // 대표 이미지: 신규 등록 모드에서는 여러 장을 누적 선택해 같은 품번의
-    // variation(포즈/컷)으로 묶어 등록할 수 있게 한다. 수정 모드에서는
-    // 기존처럼 파일 1장을 그대로 교체하는 단순 방식을 유지한다.
+    // 대표 이미지: 등록/수정 모두 여러 장을 누적 선택해 같은 품번의
+    // variation(포즈/컷)으로 묶을 수 있게 한다.
     const mainImageInputEl = document.getElementById('mainImageInput');
     if (mainImageInputEl) {
         mainImageInputEl.addEventListener('change', () => {
-            if (window.editingFirebaseId) return; // 수정 모드는 기존 단일 이미지 교체 로직 그대로 사용
+            // 수정 모드에서도 등록과 동일하게 여러 장을 누적 선택할 수 있다.
+            // (1장만 선택하면 기존처럼 현재 컷 이미지 교체, 여러 장이면 첫 장은 교체 +
+            //  나머지는 같은 품번에 새 컷으로 추가 - submitEditForm에서 처리)
             const files = Array.from(mainImageInputEl.files || []);
             files.forEach(file => {
                 window.currentMainItems.push({
@@ -554,6 +555,37 @@ function resetFilters(){
     document.getElementById('detailPanel').innerHTML = `<div class="empty-panel"></div>`;
 }
 
+function renderSubImagesHTML(item) {
+    let imgList = [];
+    if (item.subImages && Array.isArray(item.subImages)) {
+        imgList = item.subImages;
+    } else if (item.subImage) {
+        imgList = [item.subImage];
+    }
+
+    if (imgList.length === 0) return '';
+
+    return `
+    <div class="sub-image-container" id="subImageContainer">
+        <div class="sub-image-wrapper" id="subSliderWrapper" style="width: ${imgList.length * 100}%;">
+            ${imgList.map(src => `
+                <div class="sub-slide-item" style="width: ${100 / imgList.length}%;">
+                    <img src="${src}" alt="sub-image" draggable="false">
+                </div>
+            `).join('')}
+        </div>
+
+        ${imgList.length > 1 ? `
+        <div class="sub-slider-bullets" id="subSliderBullets">
+            ${imgList.map((_, idx) => `
+                <span class="sub-bullet ${idx === 0 ? 'active' : ''}" onclick="moveSubSlide(${idx})"></span>
+            `).join('')}
+        </div>
+        ` : ''}
+    </div>
+    `;
+}
+
 function updateDetailPanel(key){
     const item = window.allData.find(v => v._key === key);
     if(!item) return;
@@ -577,85 +609,37 @@ function updateDetailPanel(key){
             <button type="button" class="detail-close-btn" onclick="showEmptyPanel()" aria-label="닫기">&times;</button>
             <div class="panel-left">
                 <div class="image-wrap">
-                    <img src="${item.image}" class="main-image">
+                    <img src="${item.image}" class="main-image" id="mainImage">
 
-                    ${(() => {
-                        let imgList = [];
-                        if (item.subImages && Array.isArray(item.subImages)) {
-                            imgList = item.subImages;
-                        } else if (item.subImage) {
-                            imgList = [item.subImage];
-                        }
-
-                        if (imgList.length === 0) return '';
-
-                        return `
-                        <div class="sub-image-container" id="subImageContainer">
-                            <div class="sub-image-wrapper" id="subSliderWrapper" style="width: ${imgList.length * 100}%;">
-                                ${imgList.map(src => `
-                                    <div class="sub-slide-item" style="width: ${100 / imgList.length}%;">
-                                        <img src="${src}" alt="sub-image" draggable="false">
-                                    </div>
-                                `).join('')}
-                            </div>
-
-                            ${imgList.length > 1 ? `
-                            <div class="sub-slider-bullets" id="subSliderBullets">
-                                ${imgList.map((_, idx) => `
-                                    <span class="sub-bullet ${idx === 0 ? 'active' : ''}" onclick="moveSubSlide(${idx})"></span>
-                                `).join('')}
-                            </div>
-                            ` : ''}
-                        </div>
-                        `;
-                    })()}
+                    ${renderSubImagesHTML(item)}
                 </div>
             </div>
             <div class="panel-right">
                 <div class="panel-right-header">
-                    <h2 style="margin-bottom:0; min-width:0; overflow-wrap:break-word; word-break:break-all;">${item.title}</h2>
-                    ${item.firebaseId ? `
-                        <div style="display:flex; gap:6px; flex-shrink:0; white-space:nowrap;">
-                            <button type="button" onclick="editItem('${item.firebaseId}')" style="height:28px; padding:0 10px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">수정</button>
-                            <button type="button" onclick="deleteItem('${item.firebaseId}')" style="height:28px; padding:0 10px; border:0; border-radius:6px; background:#ff3b30; color:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">삭제</button>
-                        </div>
-                    ` : ''}
-                </div>
-                ${item.firebaseId && (item.createdBy || item.updatedBy) ? `
-                    <div class="panel-right-meta" style="font-size:14px; color:#999; margin-top:5px; margin-bottom:15px;">
-                        ${item.createdBy ? `등록자: ${item.createdBy.split('@')[0]}` : ''}${item.updatedBy ? ` · 최종 수정: ${item.updatedBy.split('@')[0]}` : ''}
+                    <h2 id="panelTitle" style="margin-bottom:0; min-width:0; overflow-wrap:break-word; word-break:break-all;">${item.title}</h2>
+                    <div style="display:flex; gap:6px; flex-shrink:0; white-space:nowrap;">
+                        <button type="button" id="detailEditBtn" style="height:28px; padding:0 10px; border:1px solid #ddd; border-radius:6px; background:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">수정</button>
+                        <button type="button" id="detailDeleteBtn" style="height:28px; padding:0 10px; border:0; border-radius:6px; background:#ff3b30; color:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">삭제</button>
                     </div>
-                ` : ''}
+                </div>
+                <div class="panel-right-meta" id="panelMeta" style="font-size:14px; color:#999; margin-top:5px; margin-bottom:15px;"></div>
                 <div class="info-table">
-                    <div class="info-row"><strong>브랜드</strong><span>${item.brand || '-'}</span></div>
-                    <div class="info-row"><strong>성별</strong><span>${item.gender || '-'}</span></div>
-                    <div class="info-row"><strong>카테고리</strong><span>${item.category || '-'}</span></div>
-                    <div class="info-row"><strong>시즌</strong><span>${item.season || '-'}</span></div>
-                    <div class="info-row"><strong>유형</strong><span>${item.usage || '-'}</span></div>   
-                    <div class="info-row"><strong>타입</strong><span>${item.type || '-'}</span></div>
-                    <div class="info-row"><strong>생성툴</strong><span>${item.tool || '-'}</span></div>
-                    <div class="info-row"><strong>배경</strong><span>${item.background || '-'}</span></div>
-                    <div class="info-row"><strong>생성부서</strong><span>${item.team || '-'}</span></div>
-                    <div class="info-row"><strong>생성일</strong><span>${item.created || '-'}</span></div>
-                    <div class="info-row full"><strong>이미지 경로</strong><span>${item.link || '-'}</span></div>              
-                    <div class="info-row full performance"><strong>활용 내용</strong><span>${item.usedIn || '-'}</span></div>
-                    <div class="info-row full performance"><strong>참고사항</strong><span>${item.reaction || '-'}</span></div>
+                    <div class="info-row"><strong>브랜드</strong><span id="infoBrand">${item.brand || '-'}</span></div>
+                    <div class="info-row"><strong>성별</strong><span id="infoGender">${item.gender || '-'}</span></div>
+                    <div class="info-row"><strong>카테고리</strong><span id="infoCategory">${item.category || '-'}</span></div>
+                    <div class="info-row"><strong>시즌</strong><span id="infoSeason">${item.season || '-'}</span></div>
+                    <div class="info-row"><strong>유형</strong><span id="infoUsage">${item.usage || '-'}</span></div>   
+                    <div class="info-row"><strong>타입</strong><span id="infoType">${item.type || '-'}</span></div>
+                    <div class="info-row"><strong>생성툴</strong><span id="infoTool">${item.tool || '-'}</span></div>
+                    <div class="info-row"><strong>배경</strong><span id="infoBackground">${item.background || '-'}</span></div>
+                    <div class="info-row"><strong>생성부서</strong><span id="infoTeam">${item.team || '-'}</span></div>
+                    <div class="info-row"><strong>생성일</strong><span id="infoCreated">${item.created || '-'}</span></div>
+                    <div class="info-row full"><strong>이미지 경로</strong><span id="infoLink">${item.link || '-'}</span></div>              
+                    <div class="info-row full performance"><strong>활용 내용</strong><span id="infoUsedIn">${item.usedIn || '-'}</span></div>
+                    <div class="info-row full performance"><strong>참고사항</strong><span id="infoReaction">${item.reaction || '-'}</span></div>
                 </div>
                 
-                ${(() => {
-                    const siblings = getGroupSiblings(item);
-                    if (siblings.length <= 1) return '';
-                    return `
-                    <div class="detail-group-strip">
-                        <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
-                        <div class="detail-group-thumbs-wrap">
-                            <div class="detail-group-thumbs" id="groupThumbs" onscroll="updateGroupThumbFade(this)">
-                                ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" onclick="updateDetailPanel('${v._key}')">`).join('')}
-                            </div>
-                            <div class="group-thumbs-fade" id="groupThumbsFade"></div>
-                        </div>
-                    </div>`;
-                })()}
+                <div id="groupStripArea"></div>
 
                 <div class="prompt-box">
                     <h3>Prompt</h3>
@@ -667,7 +651,94 @@ function updateDetailPanel(key){
     `;
 
     initSubSlider();
-    initGroupThumbFade();
+    applyDetailPanelItem(item);
+}
+
+// 대표 이미지/프롬프트/메타정보/수정·삭제 버튼/같은 제품 다른 컷 목록처럼
+// item에 따라 달라지는 부분만 채워 넣는다. updateDetailPanel(최초 오픈)과
+// switchGroupCut(같은 그룹 내 다른 컷 전환) 양쪽에서 공용으로 사용.
+function applyDetailPanelItem(item) {
+    const editBtn = document.getElementById('detailEditBtn');
+    const deleteBtn = document.getElementById('detailDeleteBtn');
+    if (editBtn) editBtn.style.display = item.firebaseId ? '' : 'none';
+    if (deleteBtn) deleteBtn.style.display = item.firebaseId ? '' : 'none';
+    if (editBtn) editBtn.onclick = () => editItem(item.firebaseId);
+    if (deleteBtn) deleteBtn.onclick = () => deleteItem(item.firebaseId);
+
+    const metaEl = document.getElementById('panelMeta');
+    if (metaEl) {
+        if (item.firebaseId && (item.createdBy || item.updatedBy)) {
+            metaEl.style.display = '';
+            metaEl.innerHTML = `${item.createdBy ? `등록자: ${item.createdBy.split('@')[0]}` : ''}${item.updatedBy ? ` · 최종 수정: ${item.updatedBy.split('@')[0]}` : ''}`;
+        } else {
+            metaEl.style.display = 'none';
+            metaEl.innerHTML = '';
+        }
+    }
+
+    const groupStripArea = document.getElementById('groupStripArea');
+    if (groupStripArea) {
+        const siblings = getGroupSiblings(item);
+        if (siblings.length <= 1) {
+            groupStripArea.innerHTML = '';
+        } else {
+            groupStripArea.innerHTML = `
+            <div class="detail-group-strip">
+                <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
+                <div class="detail-group-thumbs-wrap">
+                    <div class="detail-group-thumbs" id="groupThumbs" onscroll="updateGroupThumbFade(this)">
+                        ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" data-key="${v._key}" onclick="switchGroupCut('${v._key}')">`).join('')}
+                    </div>
+                    <div class="group-thumbs-fade" id="groupThumbsFade"></div>
+                </div>
+            </div>`;
+            initGroupThumbFade();
+            initGroupThumbsDrag();
+        }
+    }
+}
+
+// 같은 품번의 다른 컷 썸네일 클릭 시: 패널 전체를 다시 그리지 않고
+// 이미지/프롬프트/메타 등 바뀌는 값만 갱신해 전환을 빠르고 매끄럽게 한다.
+function switchGroupCut(key) {
+    const item = window.allData.find(v => v._key === key);
+    if (!item) return;
+
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    const targetCard = document.getElementById(`card-${key}`);
+    if (targetCard) targetCard.classList.add('selected');
+
+    const mainImg = document.getElementById('mainImage');
+    if (mainImg) mainImg.src = item.image;
+
+    const titleEl = document.getElementById('panelTitle');
+    if (titleEl) titleEl.textContent = item.title;
+
+    const fieldMap = {
+        infoBrand: 'brand', infoGender: 'gender', infoCategory: 'category',
+        infoSeason: 'season', infoUsage: 'usage', infoType: 'type',
+        infoTool: 'tool', infoBackground: 'background', infoTeam: 'team',
+        infoCreated: 'created', infoLink: 'link', infoUsedIn: 'usedIn', infoReaction: 'reaction'
+    };
+    Object.entries(fieldMap).forEach(([elId, field]) => {
+        const el = document.getElementById(elId);
+        if (el) el.textContent = item[field] || '-';
+    });
+
+    const promptEl = document.getElementById('promptText');
+    if (promptEl) promptEl.value = item.prompt || '';
+
+    const subImageWrap = document.querySelector('#detailPanel .image-wrap');
+    const oldSubContainer = document.getElementById('subImageContainer');
+    const newSubHTML = renderSubImagesHTML(item);
+    if (oldSubContainer) {
+        oldSubContainer.outerHTML = newSubHTML;
+    } else if (subImageWrap && newSubHTML) {
+        subImageWrap.insertAdjacentHTML('beforeend', newSubHTML);
+    }
+    initSubSlider();
+
+    applyDetailPanelItem(item);
 }
 
 // 다른 컷 썸네일 목록: 오른쪽으로 더 스크롤할 내용이 있을 때만 페이드 힌트 표시
@@ -681,8 +752,56 @@ function updateGroupThumbFade(el) {
 function initGroupThumbFade() {
     const el = document.getElementById('groupThumbs');
     if (!el) return;
+    // 다른 컷 썸네일 목록은 클릭 때마다 새로 그려지므로(활성 표시 갱신 목적)
+    // 스크롤 위치가 매번 0으로 초기화된다. 그대로 두면 방금 클릭한(맨 끝)
+    // 썸네일이 다시 맨 앞으로 밀려난 것처럼 보이므로, 선택된(active) 썸네일이
+    // 항상 보이는 위치로 스크롤을 맞춰준다.
+    const activeThumb = el.querySelector('.detail-group-thumb.active');
+    if (activeThumb) {
+        activeThumb.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
     updateGroupThumbFade(el);
     requestAnimationFrame(() => updateGroupThumbFade(el));
+}
+
+// 마우스 드래그로도 "같은 제품 · 다른 컷" 썸네일 목록을 좌우로 넘길 수 있게 함
+// (터치는 기본 스와이프 스크롤을 그대로 사용)
+function initGroupThumbsDrag() {
+    const el = document.getElementById('groupThumbs');
+    if (!el) return;
+
+    let isDown = false;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+
+    el.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') return; // 터치는 네이티브 스와이프 사용
+        isDown = true;
+        moved = false;
+        startX = e.clientX;
+        startScroll = el.scrollLeft;
+    });
+
+    el.addEventListener('pointermove', (e) => {
+        if (!isDown) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 3) moved = true;
+        el.scrollLeft = startScroll - dx;
+    });
+
+    const endDrag = () => { isDown = false; };
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointerleave', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+
+    // 드래그로 이동한 직후에는 썸네일 클릭(다른 컷 전환)이 발동하지 않도록 방지
+    el.addEventListener('click', (e) => {
+        if (moved) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }, true);
 }
 
 window.currentSubIndex = 0;
@@ -912,20 +1031,21 @@ function renderMainPreviewList() {
     if (!container) return;
     const items = window.currentMainItems || [];
 
-    // 수정 모드(단일 이미지 교체 방식)에서는 이 프리뷰 목록을 쓰지 않는다.
-    if (window.editingFirebaseId || items.length === 0) {
+    if (items.length === 0) {
         container.innerHTML = '';
         container.style.display = 'none';
         return;
     }
     container.style.display = 'flex';
 
-    container.innerHTML = items.map((it, idx) => `
+    container.innerHTML = items.map((it, idx) => {
+        const src = it.type === 'existing' ? it.url : it.previewUrl;
+        return `
         <div class="main-preview-item">
             <div class="main-preview-thumb">
                 <span class="main-preview-num">${idx + 1}</span>
                 <button type="button" class="main-preview-remove" onclick="removeMainItem(${idx})">&times;</button>
-                <img src="${it.previewUrl}">
+                <img src="${src}">
                 <div class="main-preview-actions">
                     <button type="button" onclick="moveMainItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>&uarr;</button>
                     <button type="button" onclick="moveMainItem(${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}>&darr;</button>
@@ -933,7 +1053,8 @@ function renderMainPreviewList() {
             </div>
             <textarea class="main-preview-prompt" placeholder="이 이미지만의 프롬프트 (비워두면 위쪽 공통 프롬프트 사용)" oninput="updateMainItemPrompt(${idx}, this.value)">${it.prompt || ''}</textarea>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function moveMainItem(idx, dir) {
@@ -979,20 +1100,36 @@ function openRegisterModal(item = null) {
     mainImageInput.required = false;
 
     if (item) {
-        // 수정 모드: 기존 값 채우고, 이미지 파일은 선택 안 해도 되게 변경
+        // 수정 모드: 기존 값 채우고, 같은 품번에 등록된 모든 컷(형제 문서)을
+        // 아래 목록에 미리 채워서 보여준다. 여기서 순서를 바꾸거나(▲▼),
+        // 이미지별 프롬프트를 고치거나, ×로 삭제할 수 있고, 파일을 새로
+        // 추가하면 같은 품번에 새 컷으로 추가된다(등록과 동일한 방식).
         modalTitle.innerText = '항목 수정';
         submitBtn.innerText = '수정하기';
         mainImageLabel.innerText = '대표 이미지';
-        mainImageInput.multiple = false;
-        mainImageHint.style.display = 'block';
-        mainImageMultiHint.style.display = 'none';
-        promptHint.style.display = 'none';
+        mainImageInput.multiple = true;
+        mainImageHint.style.display = 'none';
+        mainImageMultiHint.style.display = 'block';
+        mainImageMultiHint.innerText = '이미 등록된 컷은 아래 목록에 표시됩니다. ▲▼로 순서를 바꾸거나 ×로 삭제할 수 있고, 파일을 새로 선택하면 같은 품번에 새 컷으로 추가됩니다. 이미지마다 프롬프트를 다르게 입력할 수 있어요.';
+        promptHint.style.display = 'block';
         subImageHint.style.display = 'block';
 
         const fields = ['title','type','team','brand','gender','category','season','background','tool','created','link','usage','usedIn','reaction','prompt'];
         fields.forEach(f => {
             if (form[f] && item[f] !== undefined) form[f].value = item[f];
         });
+
+        // 같은 품번의 등록된 모든 컷을 대표 이미지 목록에 미리 채운다
+        const siblings = getGroupSiblings(item);
+        window.currentMainItems = siblings.map(v => ({
+            type: 'existing',
+            firebaseId: v.firebaseId,
+            url: v.image,
+            prompt: v.prompt || ''
+        }));
+        window.editingOriginalMainIds = siblings.map(v => v.firebaseId);
+        window.editingOriginalGroupId = item.groupId || null;
+        renderMainPreviewList();
 
         // 기존 서브 이미지들을 순서 조정 목록에 미리 채워둔다
         const existingSubs = item.subImages || (item.subImage ? [item.subImage] : []);
@@ -1005,6 +1142,7 @@ function openRegisterModal(item = null) {
         mainImageInput.multiple = true;
         mainImageHint.style.display = 'none';
         mainImageMultiHint.style.display = 'block';
+        mainImageMultiHint.innerText = '같은 제품의 다른 포즈/컷을 여러 장 선택하면 한 품번으로 묶여 등록됩니다. 이미지마다 프롬프트를 다르게 입력할 수 있어요.';
         promptHint.style.display = 'block';
         subImageHint.style.display = 'none';
     }
@@ -1014,6 +1152,8 @@ function openRegisterModal(item = null) {
 
 function closeRegisterModal() {
     window.editingFirebaseId = null;
+    window.editingOriginalMainIds = [];
+    window.editingOriginalGroupId = null;
     document.getElementById('registerModal').style.display = 'none';
     document.getElementById('registerForm').reset();
     resetSubItems();
@@ -1171,15 +1311,23 @@ async function submitRegisterForm(event) {
     }
 }
 
-/* ---------- 수정: 기존 방식 그대로, variation(문서) 1건 단위 ---------- */
+/* ---------- 수정: 같은 품번(그룹)에 등록된 모든 컷을 한 번에 관리한다.
+   대표 이미지 목록(window.currentMainItems)에는 기존 컷(existing)과 새로
+   추가한 컷(new)이 함께 들어있고, 목록에 남은 순서 그대로 groupOrder를
+   다시 매긴다. 목록에서 뺀(×로 지운) 기존 컷은 문서 자체를 삭제한다. ---------- */
 async function submitEditForm(form, submitBtn, originalLabel) {
-    const mainFile = form.mainImage.files[0];
+    const mainItems = window.currentMainItems || [];
+    if (mainItems.length === 0) {
+        customAlert('대표 이미지를 최소 1장 이상 남겨주세요.');
+        return;
+    }
     submitBtn.disabled = true;
 
     try {
         const subItems = window.currentSubItems || [];
         const newSubCount = subItems.filter(it => it.type === 'new').length;
-        const filesToUpload = (mainFile ? 1 : 0) + newSubCount;
+        const newMainCount = mainItems.filter(it => it.type === 'new').length;
+        const filesToUpload = newMainCount + newSubCount;
         let doneCount = 0;
         const updateProgress = () => {
             submitBtn.innerText = filesToUpload > 0
@@ -1187,15 +1335,6 @@ async function submitEditForm(form, submitBtn, originalLabel) {
                 : '저장 중...';
         };
         updateProgress();
-
-        let mainImageUrl;
-        if (mainFile) {
-            mainImageUrl = await uploadFileToStorage(mainFile);
-            doneCount++; updateProgress();
-        } else {
-            const existing = window.allData.find(v => v.firebaseId === window.editingFirebaseId);
-            mainImageUrl = existing ? existing.image : '';
-        }
 
         const subImageUrls = [];
         for (const it of subItems) {
@@ -1208,7 +1347,8 @@ async function submitEditForm(form, submitBtn, originalLabel) {
             }
         }
 
-        const itemData = {
+        const commonPrompt = form.prompt.value.trim();
+        const baseData = {
             title: form.title.value.trim(),
             type: form.type.value,
             team: form.team.value,
@@ -1223,41 +1363,92 @@ async function submitEditForm(form, submitBtn, originalLabel) {
             usage: form.usage.value,
             usedIn: form.usedIn.value.trim(),
             reaction: form.reaction.value.trim(),
-            prompt: form.prompt.value.trim(),
-            image: mainImageUrl,
             subImages: subImageUrls,
         };
+
+        // 목록에 남아있는 순서대로 groupOrder를 다시 매긴다.
+        // 최종적으로 1장만 남으면 그룹을 해제(groupId 없음)한다.
+        const groupId = mainItems.length > 1
+            ? (window.editingOriginalGroupId || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)))
+            : null;
+
+        // 목록에서 빠진(×로 지운) 기존 컷 = 삭제 대상
+        const keptExistingIds = mainItems.filter(it => it.type === 'existing').map(it => it.firebaseId);
+        const removedIds = (window.editingOriginalMainIds || []).filter(id => !keptExistingIds.includes(id));
 
         submitBtn.innerText = '정보 저장 중...';
         const editingId = window.editingFirebaseId; // closeRegisterModal이 초기화하기 전에 미리 저장
 
-        // .update()는 지정한 필드만 갱신하는 부분 병합이라, 문서에 이미
-        // groupId/groupOrder가 있어도 그대로 유지된다(따로 손댈 필요 없음).
-        await Promise.race([
-            window.db.collection('gallery_items').doc(editingId).update({
-                ...itemData,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedBy: window.currentUser ? window.currentUser.email : null
-            }),
-            buildTimeoutPromise()
-        ]);
+        for (const rid of removedIds) {
+            await Promise.race([
+                window.db.collection('gallery_items').doc(rid).delete(),
+                buildTimeoutPromise()
+            ]);
+        }
+
+        const savedItems = [];
+        for (let i = 0; i < mainItems.length; i++) {
+            const mi = mainItems[i];
+            const prompt = (mi.prompt && mi.prompt.trim()) || commonPrompt;
+            const groupFields = groupId ? { groupId, groupOrder: i } : { groupId: null, groupOrder: null };
+
+            if (mi.type === 'existing') {
+                const itemData = { ...baseData, prompt, image: mi.url, ...groupFields };
+                await Promise.race([
+                    window.db.collection('gallery_items').doc(mi.firebaseId).update({
+                        ...itemData,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: window.currentUser ? window.currentUser.email : null
+                    }),
+                    buildTimeoutPromise()
+                ]);
+                savedItems.push({
+                    ...itemData,
+                    firebaseId: mi.firebaseId,
+                    _key: mi.firebaseId,
+                    updatedBy: window.currentUser ? window.currentUser.email : null
+                });
+            } else {
+                const url = await uploadFileToStorage(mi.file);
+                doneCount++; updateProgress();
+                const itemData = { ...baseData, prompt, image: url, ...groupFields };
+                const result = await Promise.race([
+                    window.db.collection('gallery_items').add({
+                        ...itemData,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        createdBy: window.currentUser ? window.currentUser.email : null
+                    }),
+                    buildTimeoutPromise()
+                ]);
+                savedItems.push({
+                    ...itemData,
+                    firebaseId: result.id,
+                    _key: result.id,
+                    createdBy: window.currentUser ? window.currentUser.email : null
+                });
+            }
+        }
+
+        // window.allData 갱신: 삭제된 문서 제거 + 기존/신규 문서 반영
+        window.allData = window.allData.filter(v => !removedIds.includes(v.firebaseId));
+        savedItems.forEach(si => {
+            const idx = window.allData.findIndex(v => v.firebaseId === si.firebaseId);
+            if (idx !== -1) {
+                window.allData[idx] = { ...window.allData[idx], ...si };
+            } else {
+                window.allData.unshift(si);
+            }
+        });
 
         await customAlert('수정이 완료되었습니다.');
 
-        const idx = window.allData.findIndex(v => v.firebaseId === editingId);
-        if (idx !== -1) {
-            window.allData[idx] = {
-                ...window.allData[idx],
-                ...itemData,
-                updatedBy: window.currentUser ? window.currentUser.email : null,
-                _key: editingId
-            };
-        }
         submitBtn.disabled = false;
         submitBtn.innerText = originalLabel;
         closeRegisterModal();
         applyFilters();
-        updateDetailPanel(editingId);
+        // 원래 열었던 컷이 삭제됐을 수도 있으니, 없으면 목록의 첫 컷을 보여준다.
+        const stillThere = savedItems.find(v => v.firebaseId === editingId);
+        updateDetailPanel(stillThere ? editingId : savedItems[0]._key);
         renderNewArrivals(window.allData);
     } catch (err) {
         console.error(err);
