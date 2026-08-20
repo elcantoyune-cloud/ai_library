@@ -650,11 +650,10 @@ function updateDetailPanel(key){
         </div>
     `;
 
+    updateMediaSplitClass(item);
     initSubSlider();
     applyDetailPanelItem(item);
 }
-
-// 대표 이미지/프롬프트/메타정보/수정·삭제 버튼/같은 제품 다른 컷 목록처럼
 // item에 따라 달라지는 부분만 채워 넣는다. updateDetailPanel(최초 오픈)과
 // switchGroupCut(같은 그룹 내 다른 컷 전환) 양쪽에서 공용으로 사용.
 function applyDetailPanelItem(item) {
@@ -697,15 +696,20 @@ function applyDetailPanelItem(item) {
             initGroupThumbsDrag();
         }
     }
+}
 
-    // 모바일: "같은 제품 다른 컷"과 "서브 이미지"가 둘 다 있을 때만
-    // 좌(다른 컷)/우(서브 이미지) 나란히 배치(media-split)한다.
-    // 둘 중 하나만 있으면 기존처럼 한 줄 전체 폭을 그대로 사용한다.
-    const panelContentEl2 = document.querySelector('.panel-content');
-    if (panelContentEl2) {
-        const hasSubImages = !!document.getElementById('subImageContainer');
-        panelContentEl2.classList.toggle('media-split', groupSiblingsCount > 1 && hasSubImages);
-    }
+// 모바일: "같은 제품 다른 컷"과 "서브 이미지"가 둘 다 있을 때만
+// 좌(다른 컷)/우(서브 이미지) 나란히 배치(media-split)한다.
+// 둘 중 하나만 있으면 기존처럼 한 줄 전체 폭을 그대로 사용한다.
+// (서브 이미지 슬라이더는 폭을 인라인 style로 직접 계산하므로, HTML 삽입 직후·
+//  initSubSlider() 실행 전에 먼저 호출해서 좁아진 실제 컬럼 폭 기준으로 계산되게 한다.)
+function updateMediaSplitClass(item) {
+    const panelContentEl = document.querySelector('.panel-content');
+    const groupStripArea = document.getElementById('groupStripArea');
+    if (!panelContentEl) return;
+    const groupSiblingsCount = groupStripArea ? getGroupSiblings(item).length : 0;
+    const hasSubImages = !!document.getElementById('subImageContainer');
+    panelContentEl.classList.toggle('media-split', groupSiblingsCount > 1 && hasSubImages);
 }
 
 // 같은 품번의 다른 컷 썸네일 클릭 시: 패널 전체를 다시 그리지 않고
@@ -746,6 +750,7 @@ function switchGroupCut(key) {
     } else if (subImageWrap && newSubHTML) {
         subImageWrap.insertAdjacentHTML('beforeend', newSubHTML);
     }
+    updateMediaSplitClass(item);
     initSubSlider();
 
     applyDetailPanelItem(item);

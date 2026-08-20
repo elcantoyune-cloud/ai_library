@@ -1503,6 +1503,7 @@
         background: #fff;
         z-index: 1500;
         overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -1528,8 +1529,8 @@
             "mainimg"
             "groupcuts"
             "subimg"
-            "info"
-            "prompt";
+            "prompt"
+            "info";
         width: 100%;
         height: auto;
         min-height: 100%;
@@ -1539,21 +1540,16 @@
 
     .panel-content.media-split {
         grid-template-columns: 60% 40%;
-        column-gap: 12px;
+        column-gap: 5px;
         grid-template-areas:
             "header header"
             "meta meta"
             "mainimg mainimg"
             "groupcuts subimg"
-            "info info"
-            "prompt prompt";
+            "prompt prompt"
+            "info info";
     }
 
-    /* 모바일에서는 PC와 달리 좌/우 2단 구성이 아니라 grid로 보여줘야 하므로,
-       중간 래퍼(.panel-left, .image-wrap, .panel-right)의 박스를 해제(display:contents)해서
-       그 안의 실제 콘텐츠가 모두 .panel-content의 grid 아이템이 되게 한다.
-       (주의: grid-area는 실제 grid 아이템에만 적용된다 — #groupStripArea·#subImageContainer처럼
-       JS가 내용을 채워 넣는 실제 자식 요소에 지정해야 하고, 그 안의 하위 div에 줘봐야 효과 없다.) */
     .panel-left,
     .image-wrap,
     .panel-right {
@@ -1561,7 +1557,7 @@
     }
 
     .panel-left img {
-        aspect-ratio: 4 / 5;
+        aspect-ratio: 4.2 / 5;
     }
 
     .panel-right-header { grid-area: header; }
@@ -1578,6 +1574,11 @@
         margin-top: 20px;
         min-width: 0;
     }
+    /* 다른 컷이 없어서 비어있을 땐(#groupStripArea:empty) 위쪽 여백을 없애서
+       메인 이미지와 서브 이미지 사이가 이중으로 벌어지지 않게 한다. */
+    #groupStripArea:empty {
+        margin-top: 0;
+    }
     #subImageContainer {
         grid-area: subimg;
         margin-top: 20px;
@@ -1592,13 +1593,11 @@
         align-self: center;
     }
     .panel-content.media-split .detail-group-thumb {
-        width: 78px;
-        height: 78px;
+        width: 70px;
+        height:70px;
     }
     .info-table {
         grid-area: info;
-        margin-top: 20px;
-        /* 모바일에서는 사각 박스 카드 느낌 대신, 위/아래 라인만 남긴 리스트 형태로 */
         border: none;
         border-top: 1px solid #ececec;
         border-bottom: 1px solid #ececec;
@@ -1713,7 +1712,7 @@
     }
 
     .panel-content {
-        padding: 20px 16px 50px 16px;
+        padding: 24px 16px 50px 16px;
     }
 
     .panel-right h2 {
