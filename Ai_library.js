@@ -300,7 +300,7 @@ function renderNewArrivals(data) {
         return `
         <div class="na-card" onclick="updateDetailPanel('${rep._key}')">
             <div class="na-card-img-wrap">
-                <img src="${rep.image}" alt="${rep.title || ''}">
+                <img src="${rep.image}" alt="${rep.title || ''}" draggable="false">
                 ${group.length > 1 ? `<span class="na-badge">${group.length}종</span>` : ''}
             </div>
             <div class="na-card-title">${rep.title || ''}</div>
@@ -687,7 +687,7 @@ function applyDetailPanelItem(item) {
                 <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
                 <div class="detail-group-thumbs-wrap">
                     <div class="detail-group-thumbs" id="groupThumbs" onscroll="updateGroupThumbFade(this)">
-                        ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" data-key="${v._key}" onclick="switchGroupCut('${v._key}')">`).join('')}
+                        ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" data-key="${v._key}" draggable="false" onclick="switchGroupCut('${v._key}')">`).join('')}
                     </div>
                     <div class="group-thumbs-fade" id="groupThumbsFade"></div>
                 </div>

@@ -588,6 +588,8 @@
             flex-shrink: 0;
             opacity: 0.6;
             transition: .2s;
+            -webkit-user-drag: none;
+            user-select: none;
         }
 
         .detail-group-thumb:hover {
