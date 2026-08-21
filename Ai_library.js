@@ -21,6 +21,243 @@ function waitForAuth() {
     });
 }
 
+// ===== PC 필터 커스텀 셀렉트 =====
+// 모바일은 OS 네이티브 select UI가 이미 예쁘게 나오므로 그대로 두고,
+// PC(마우스 포인터) 레이아웃에서만 같은 무드의 커스텀 드롭다운으로 대체한다.
+const CS_MOBILE_QUERY = '(max-width: 1320px) and (not (pointer: fine)), (max-width: 900px)';
+
+function isMobileLayout() {
+    return window.matchMedia(CS_MOBILE_QUERY).matches;
+}
+
+function closeAllCustomSelects(except) {
+    document.querySelectorAll('.custom-select.open').forEach(wrap => {
+        if (wrap !== except && wrap._csClose) wrap._csClose();
+    });
+}
+
+function syncAllCustomSelectLabels() {
+    document.querySelectorAll('.custom-select').forEach(wrap => {
+        if (wrap._csSync) wrap._csSync();
+    });
+}
+
+// 시즌 select에서 오늘 날짜와 가장 가까운 시즌 옵션값을 찾는다 (예: '26 AUTUMN')
+function findNearestSeasonValue(select) {
+    const termRank = { SPRING: 1, SUMMER: 2, AUTUMN: 3, WINTER: 4 };
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear() % 100;
+    let currentTerm;
+    if (month >= 3 && month <= 5) currentTerm = 'SPRING';
+    else if (month >= 6 && month <= 8) currentTerm = 'SUMMER';
+    else if (month >= 9 && month <= 11) currentTerm = 'AUTUMN';
+    else currentTerm = 'WINTER';
+    const currentScore = year * 10 + termRank[currentTerm];
+
+    let best = null;
+    let bestDiff = Infinity;
+    Array.from(select.options).forEach(opt => {
+        if (!opt.value) return;
+        const parts = opt.value.split(' ');
+        if (parts.length !== 2) return;
+        const y = parseInt(parts[0], 10);
+        const t = termRank[parts[1]];
+        if (Number.isNaN(y) || !t) return;
+        const diff = Math.abs((y * 10 + t) - currentScore);
+        if (diff < bestDiff) {
+            bestDiff = diff;
+            best = opt.value;
+        }
+    });
+    return best;
+}
+
+function enhanceFilterSelects() {
+    if (isMobileLayout()) return; // 모바일은 네이티브 select 유지
+
+    document.querySelectorAll('.filter-area select').forEach(select => {
+        if (select.dataset.csEnhanced) return;
+        select.dataset.csEnhanced = 'true';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'custom-select';
+        select.parentNode.insertBefore(wrap, select);
+        wrap.appendChild(select);
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'custom-select-trigger';
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'cs-label';
+        const arrow = document.createElement('span');
+        arrow.className = 'cs-arrow';
+        trigger.appendChild(labelSpan);
+        trigger.appendChild(arrow);
+        wrap.appendChild(trigger);
+
+        const panel = document.createElement('div');
+        panel.className = 'custom-select-panel';
+        document.body.appendChild(panel); // container의 overflow에 잘리지 않도록 body에 붙임
+
+        function buildOptions() {
+            panel.innerHTML = '';
+            Array.from(select.options).forEach(opt => {
+                const item = document.createElement('div');
+                item.className = 'custom-select-option' + (opt.value === select.value ? ' selected' : '');
+                item.dataset.value = opt.value;
+
+                const text = document.createElement('span');
+                text.textContent = opt.textContent;
+                const check = document.createElement('span');
+                check.className = 'cs-check';
+
+                item.appendChild(text);
+                item.appendChild(check);
+
+                item.addEventListener('click', () => {
+                    select.value = opt.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    syncLabel();
+                    closePanel();
+                });
+
+                item.addEventListener('mouseenter', () => {
+                    const idx = Array.from(panel.children).indexOf(item);
+                    setHighlight(idx, false);
+                });
+
+                panel.appendChild(item);
+            });
+        }
+
+        function syncLabel() {
+            const selectedOpt = select.options[select.selectedIndex];
+            labelSpan.textContent = selectedOpt ? selectedOpt.textContent : '';
+            trigger.classList.toggle('has-value', !!select.value);
+            Array.from(panel.children).forEach(el => {
+                el.classList.toggle('selected', el.dataset.value === select.value);
+            });
+        }
+
+        function setHighlight(idx, scroll) {
+            const items = Array.from(panel.children);
+            items.forEach((el, i) => el.classList.toggle('highlighted', i === idx));
+            if (scroll && items[idx]) {
+                items[idx].scrollIntoView({ block: 'center' });
+            }
+        }
+
+        function getHighlightedIndex() {
+            return Array.from(panel.children).findIndex(el => el.classList.contains('highlighted'));
+        }
+
+        function positionPanel() {
+            const r = trigger.getBoundingClientRect();
+            const gap = 6;
+            const spaceBelow = window.innerHeight - r.bottom - gap;
+            const spaceAbove = r.top - gap;
+            const maxPanelHeight = 280;
+
+            panel.style.left = r.left + 'px';
+            panel.style.width = r.width + 'px';
+
+            if (spaceBelow < 160 && spaceAbove > spaceBelow) {
+                // 아래 공간이 부족하면 위쪽으로 펼침
+                const height = Math.min(maxPanelHeight, spaceAbove);
+                panel.style.maxHeight = height + 'px';
+                panel.style.top = (r.top - gap - height) + 'px';
+            } else {
+                const height = Math.min(maxPanelHeight, spaceBelow);
+                panel.style.maxHeight = height + 'px';
+                panel.style.top = (r.bottom + gap) + 'px';
+            }
+        }
+
+        function openPanel() {
+            closeAllCustomSelects(wrap);
+            positionPanel();
+            panel.classList.add('open');
+            wrap.classList.add('open');
+
+            // 열었을 때 시작 위치: 이미 값이 있으면 그 값, 시즌은 값이 없으면 오늘과 가장 가까운 시즌
+            const items = Array.from(panel.children);
+            let idx = items.findIndex(el => el.dataset.value === select.value && select.value !== '');
+            if (idx === -1 && select.id === 'season') {
+                const nearest = findNearestSeasonValue(select);
+                if (nearest) idx = items.findIndex(el => el.dataset.value === nearest);
+            }
+            if (idx === -1) idx = items.findIndex(el => el.dataset.value === select.value);
+            if (idx === -1) idx = 0;
+            setHighlight(idx, true);
+        }
+
+        function closePanel() {
+            panel.classList.remove('open');
+            wrap.classList.remove('open');
+        }
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (panel.classList.contains('open')) closePanel();
+            else openPanel();
+        });
+
+        trigger.addEventListener('keydown', (e) => {
+            if (!['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) return;
+            if (!panel.classList.contains('open')) {
+                if (e.key === 'ArrowDown' || e.key === 'Enter') {
+                    e.preventDefault();
+                    openPanel();
+                }
+                return;
+            }
+            const items = Array.from(panel.children);
+            let idx = getHighlightedIndex();
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                idx = Math.min(items.length - 1, idx < 0 ? 0 : idx + 1);
+                setHighlight(idx, true);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                idx = Math.max(0, idx < 0 ? 0 : idx - 1);
+                setHighlight(idx, true);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (idx >= 0) {
+                    const opt = items[idx];
+                    select.value = opt.dataset.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    syncLabel();
+                }
+                closePanel();
+            } else if (e.key === 'Escape') {
+                closePanel();
+            }
+        });
+
+        wrap._csSync = syncLabel;
+        wrap._csClose = closePanel;
+
+        buildOptions();
+        syncLabel();
+    });
+
+    if (!document.body.dataset.csGlobalBound) {
+        document.body.dataset.csGlobalBound = 'true';
+        document.addEventListener('click', () => closeAllCustomSelects());
+        window.addEventListener('resize', () => {
+            closeAllCustomSelects();
+            enhanceFilterSelects(); // 창 크기가 PC 기준으로 바뀌면 그때 적용
+        });
+        window.addEventListener('scroll', (e) => {
+            // 드롭다운 패널 내부 스크롤(휠로 옵션 탐색)은 닫지 않음
+            if (e.target && e.target.nodeType === 1 && e.target.closest('.custom-select-panel')) return;
+            closeAllCustomSelects();
+        }, true);
+    }
+}
+
 async function loginUser(event) {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -207,6 +444,7 @@ window.allData.sort((a, b) => {
     document.querySelectorAll('.filter-area select').forEach(select => {
         select.addEventListener('change', applyFilters);
     });
+    enhanceFilterSelects();
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('keydown', (event) => {
@@ -542,6 +780,7 @@ function applyFilters(){
 function resetFilters(){
     document.getElementById('searchInput').value = '';
     document.querySelectorAll('.filter-area select').forEach(select => select.value = '');
+    syncAllCustomSelectLabels();
     renderGroupedCards(allData); 
     
     document.getElementById('gallery').style.display = 'none';

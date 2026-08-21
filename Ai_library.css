@@ -50,7 +50,7 @@
 
         /* 왼쪽 메뉴 영역 */
         .container {
-            width: 35%;
+            width: 33%;
             min-width: 450px;
             flex-shrink: 0;
             height: 100%;
@@ -128,6 +128,149 @@
             font-size: 13px;
             font-weight:500;
             width: 100%;
+        }
+
+        /* ===== PC 필터 커스텀 셀렉트 (모바일 네이티브 셀렉트와 같은 무드) ===== */
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select select {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .custom-select-trigger {
+            width: 100%;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 0 12px;
+            background: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: #111;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .custom-select-trigger:hover {
+            border-color: #bbb;
+        }
+
+        .custom-select-trigger .cs-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #8e8e8e;
+        }
+
+        .custom-select-trigger.has-value .cs-label {
+            color: #111;
+            font-weight: 600;
+        }
+
+        .custom-select-trigger .cs-arrow {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: 16px;
+            transition: transform .2s ease;
+        }
+
+        .custom-select.open .custom-select-trigger {
+            border-color: #0066ff;
+            box-shadow: 0 0 0 3px rgba(0,102,255,0.12);
+        }
+
+        .custom-select.open .cs-arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-select-panel {
+            position: fixed;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 16px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+            padding: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 500;
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+            transition: opacity .15s ease, transform .15s ease;
+        }
+
+        .custom-select-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-select-panel::-webkit-scrollbar-thumb {
+            background: #e2e2e2;
+            border-radius: 6px;
+        }
+
+        .custom-select-panel.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .custom-select-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 11px 12px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            transition: background .12s ease;
+        }
+
+        .custom-select-option:hover {
+            background: #f5f6f8;
+        }
+
+        .custom-select-option.selected {
+            background: #eef4ff;
+            color: #0066ff;
+            font-weight: 700;
+        }
+
+        .custom-select-option.highlighted {
+            outline: 2px solid rgba(0,102,255,0.35);
+            outline-offset: -2px;
+        }
+
+        .custom-select-option .cs-check {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230066ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: 16px;
+            opacity: 0;
+        }
+
+        .custom-select-option.selected .cs-check {
+            opacity: 1;
         }
 
         .result-count {
