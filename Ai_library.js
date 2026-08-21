@@ -622,7 +622,7 @@ function updateDetailPanel(key){
                         <button type="button" id="detailDeleteBtn" style="height:28px; padding:0 10px; border:0; border-radius:6px; background:#ff3b30; color:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">삭제</button>
                     </div>
                 </div>
-                <div class="panel-right-meta" id="panelMeta" style="font-size:14px; color:#999; margin-top:5px; margin-bottom:15px;"></div>
+                <div class="panel-right-meta" id="panelMeta" style="font-size:14px; color:#999; margin-top:5px; margin-bottom:5px;"></div>
                 <div class="info-table">
                     <div class="info-row"><strong>브랜드</strong><span id="infoBrand">${item.brand || '-'}</span></div>
                     <div class="info-row"><strong>성별</strong><span id="infoGender">${item.gender || '-'}</span></div>
@@ -641,11 +641,7 @@ function updateDetailPanel(key){
                 
                 <div id="groupStripArea"></div>
 
-                <div class="prompt-box">
-                    <h3>Prompt</h3>
-                    <textarea readonly id="promptText">${item.prompt || ''}</textarea>
-                    <button class="copy-btn" onclick="copyPrompt()">프롬프트 복사</button>
-                </div>
+                ${renderPromptBoxHTML(item)}
             </div>
         </div>
     `;
@@ -653,6 +649,17 @@ function updateDetailPanel(key){
     updateMediaSplitClass(item);
     initSubSlider();
     applyDetailPanelItem(item);
+}
+
+// 프롬프트가 없는 항목은 빈 박스를 그대로 보여주지 않고, 박스 자체를 아예 렌더링하지 않는다.
+function renderPromptBoxHTML(item) {
+    if (!item.prompt) return '';
+    return `
+                <div class="prompt-box" id="promptBox">
+                    <h3>Prompt</h3>
+                    <textarea readonly id="promptText">${item.prompt}</textarea>
+                    <button class="copy-btn" onclick="copyPrompt()">프롬프트 복사</button>
+                </div>`;
 }
 // item에 따라 달라지는 부분만 채워 넣는다. updateDetailPanel(최초 오픈)과
 // switchGroupCut(같은 그룹 내 다른 컷 전환) 양쪽에서 공용으로 사용.
@@ -682,6 +689,12 @@ function applyDetailPanelItem(item) {
             groupStripArea.innerHTML = '';
         } else {
             const siblings = getGroupSiblings(item);
+            // 썸네일 목록을 다시 그리기 전에 기존 스크롤 위치를 저장해뒀다가
+            // 다시 그린 뒤 그대로 복원한다. (활성 썸네일을 강제로 화면에 끌어오면
+            // 오른쪽 끝까지 넘긴 상태에서 중간 썸네일을 눌렀을 때 그 썸네일이
+            // 오른쪽 끝으로 붙어버리는 것처럼 보이는 문제가 있었음)
+            const prevThumbsEl = document.getElementById('groupThumbs');
+            const prevScrollLeft = prevThumbsEl ? prevThumbsEl.scrollLeft : null;
             groupStripArea.innerHTML = `
             <div class="detail-group-strip">
                 <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
@@ -692,7 +705,7 @@ function applyDetailPanelItem(item) {
                     <div class="group-thumbs-fade" id="groupThumbsFade"></div>
                 </div>
             </div>`;
-            initGroupThumbFade();
+            initGroupThumbFade(prevScrollLeft);
             initGroupThumbsDrag();
         }
     }
@@ -739,8 +752,21 @@ function switchGroupCut(key) {
         if (el) el.textContent = item[field] || '-';
     });
 
-    const promptEl = document.getElementById('promptText');
-    if (promptEl) promptEl.value = item.prompt || '';
+    // 프롬프트 유무에 따라 박스 자체를 붙였다 뗐다 한다.
+    // (다른 컷으로 전환하면서 프롬프트가 있는 컷 <-> 없는 컷을 오갈 수 있으므로
+    //  textarea 값만 바꾸는 게 아니라 박스 전체를 있음/없음에 맞게 갱신해야 함)
+    const oldPromptBox = document.getElementById('promptBox');
+    const newPromptHTML = renderPromptBoxHTML(item);
+    if (oldPromptBox) {
+        if (newPromptHTML) {
+            oldPromptBox.outerHTML = newPromptHTML;
+        } else {
+            oldPromptBox.remove();
+        }
+    } else if (newPromptHTML) {
+        const panelRight = document.querySelector('#detailPanel .panel-right');
+        if (panelRight) panelRight.insertAdjacentHTML('beforeend', newPromptHTML);
+    }
 
     const subImageWrap = document.querySelector('#detailPanel .image-wrap');
     const oldSubContainer = document.getElementById('subImageContainer');
@@ -764,16 +790,22 @@ function updateGroupThumbFade(el) {
     fade.style.opacity = hasMoreToRight ? '1' : '0';
 }
 
-function initGroupThumbFade() {
+function initGroupThumbFade(prevScrollLeft) {
     const el = document.getElementById('groupThumbs');
     if (!el) return;
     // 다른 컷 썸네일 목록은 클릭 때마다 새로 그려지므로(활성 표시 갱신 목적)
-    // 스크롤 위치가 매번 0으로 초기화된다. 그대로 두면 방금 클릭한(맨 끝)
-    // 썸네일이 다시 맨 앞으로 밀려난 것처럼 보이므로, 선택된(active) 썸네일이
-    // 항상 보이는 위치로 스크롤을 맞춰준다.
-    const activeThumb = el.querySelector('.detail-group-thumb.active');
-    if (activeThumb) {
-        activeThumb.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    // 스크롤 위치가 매번 0으로 초기화된다. 이전에는 매번 활성 썸네일을 강제로
+    // 화면에 끌어왔는데, 그러면 오른쪽 끝까지 스크롤해둔 상태에서 중간 썸네일을
+    // 클릭했을 때 그 썸네일이 오른쪽 끝으로 붙는 것처럼 보이는 문제가 있었다.
+    // 이제는 클릭 이전의 스크롤 위치를 그대로 복원해 목록이 제자리에 머물게 하고,
+    // 최초로 열려서 이전 스크롤 위치가 없을 때만 활성 썸네일이 보이도록 스크롤한다.
+    if (prevScrollLeft !== null && prevScrollLeft !== undefined) {
+        el.scrollLeft = prevScrollLeft;
+    } else {
+        const activeThumb = el.querySelector('.detail-group-thumb.active');
+        if (activeThumb) {
+            activeThumb.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
     }
     updateGroupThumbFade(el);
     requestAnimationFrame(() => updateGroupThumbFade(el));
@@ -785,30 +817,39 @@ function initGroupThumbsDrag() {
     const el = document.getElementById('groupThumbs');
     if (!el) return;
 
-    let isDown = false;
-    let startX = 0;
-    let startScroll = 0;
     let moved = false;
 
     el.addEventListener('pointerdown', (e) => {
         if (e.pointerType === 'touch') return; // 터치는 네이티브 스와이프 사용
-        isDown = true;
+
+        // preventDefault를 안 걸어주면 이미지 위에서 mousedown+move가 브라우저의
+        // 기본 "이미지 드래그(선택/드래그아웃)" 동작으로 먼저 먹혀버려서, 이후
+        // move 이벤트가 이 리스너까지 오지 않아 슬라이드 자체가 아예 안 먹는
+        // 원인이 됐다. draggable="false"만으로는 완전히 막히지 않는 브라우저가 있음.
+        e.preventDefault();
+
         moved = false;
-        startX = e.clientX;
-        startScroll = el.scrollLeft;
-    });
+        const startX = e.clientX;
+        const startScroll = el.scrollLeft;
+        el.classList.add('dragging');
 
-    el.addEventListener('pointermove', (e) => {
-        if (!isDown) return;
-        const dx = e.clientX - startX;
-        if (Math.abs(dx) > 3) moved = true;
-        el.scrollLeft = startScroll - dx;
+        // move/up은 el이 아니라 document에 걸어서, 드래그 중 마우스가 썸네일
+        // 영역(세로 폭이 좁음) 밖으로 살짝 벗어나도 드래그가 끊기지 않게 한다.
+        const onMove = (e2) => {
+            const dx = e2.clientX - startX;
+            if (Math.abs(dx) > 3) moved = true;
+            el.scrollLeft = startScroll - dx;
+        };
+        const onUp = () => {
+            el.classList.remove('dragging');
+            document.removeEventListener('pointermove', onMove);
+            document.removeEventListener('pointerup', onUp);
+            document.removeEventListener('pointercancel', onUp);
+        };
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+        document.addEventListener('pointercancel', onUp);
     });
-
-    const endDrag = () => { isDown = false; };
-    el.addEventListener('pointerup', endDrag);
-    el.addEventListener('pointerleave', endDrag);
-    el.addEventListener('pointercancel', endDrag);
 
     // 드래그로 이동한 직후에는 썸네일 클릭(다른 컷 전환)이 발동하지 않도록 방지
     el.addEventListener('click', (e) => {

@@ -4,8 +4,6 @@
             box-sizing: border-box;
         }
 
-        /* 모든 select의 기본(OS 네이티브) 화살표를 제거하고 커스텀 화살표로 통일
-           -> 라운드 border-radius가 오른쪽 끝까지 깨지지 않고 온전히 적용됨 */
         select {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -540,7 +538,7 @@
         }
 
         .detail-group-strip {
-            margin-top: 20px;
+            margin-top: 0px;
         }
 
         .detail-group-label {
@@ -561,6 +559,9 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
             cursor: grab;
+        }
+        .detail-group-thumbs.dragging {
+            cursor: grabbing;
         }
         .detail-group-thumbs::-webkit-scrollbar {
             display: none;
@@ -1250,8 +1251,8 @@
     position: absolute;
     top: 25px;
     right: 25px;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border: 0;
     border-radius: 50%;
     background: rgba(17,17,17,0.06);
@@ -1540,7 +1541,7 @@
 
     .panel-content.media-split {
         grid-template-columns: 60% 40%;
-        column-gap: 5px;
+        column-gap: 0px;
         grid-template-areas:
             "header header"
             "meta meta"
@@ -1607,10 +1608,22 @@
     .info-row:nth-child(2n) {
         border-left: none;
     }
-    .prompt-box { grid-area: prompt; margin-top: 20px; }
+    .prompt-box { grid-area: prompt; margin-top: 10px; margin-bottom:20px;}
 
+    /* 제목이 길면 헤더 옆 X 버튼과 겹치므로, 모바일에서는 패널 상단이 아니라
+       메인 이미지 우측 상단 위에 떠 있도록 위치를 옮긴다. */
     .detail-close-btn {
         display: flex;
+        grid-area: mainimg;
+        align-self: start;
+        justify-self: end;
+        top: 20px;
+        right: 15px;
+        background: rgba(17,17,17,0.25);
+        color: #fff;
+    }
+    .detail-close-btn:hover {
+        background: rgba(17,17,17,0.6);
     }
 
     /* 등록/수정 모달 - 전체화면이 아니라 여백을 둔 팝업(카드) 형태 유지, 화면 폭만 안 넘치게 조정 */
@@ -1712,7 +1725,7 @@
     }
 
     .panel-content {
-        padding: 24px 16px 50px 16px;
+        padding: 26px 16px 50px 16px;
     }
 
     .panel-right h2 {
