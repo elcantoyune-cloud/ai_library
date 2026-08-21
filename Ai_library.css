@@ -475,9 +475,8 @@
             grid-template-columns: 1fr 1fr;
             width: 100%;
             margin-bottom: 16px;
-            border: 1px solid #efefef;
-            border-radius: 14px;
-            overflow: hidden;
+            border-top: 1px solid #ececec;
+            border-bottom: 1px solid #ececec;
             flex-shrink: 0;
         }
 
@@ -509,9 +508,6 @@
 
         .info-row:nth-child(n+3) {
             border-top: 1px solid #f3f3f3;
-        }
-        .info-row:nth-child(2n) {
-            border-left: 1px solid #f3f3f3;
         }
 
         .info-row.full {
@@ -1251,8 +1247,8 @@
     position: absolute;
     top: 25px;
     right: 25px;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border: 0;
     border-radius: 50%;
     background: rgba(17,17,17,0.06);
@@ -1599,14 +1595,7 @@
     }
     .info-table {
         grid-area: info;
-        border: none;
-        border-top: 1px solid #ececec;
-        border-bottom: 1px solid #ececec;
-        border-radius: 0;
         overflow: visible;
-    }
-    .info-row:nth-child(2n) {
-        border-left: none;
     }
     .prompt-box { grid-area: prompt; margin-top: 10px; margin-bottom:20px;}
 
@@ -1617,9 +1606,9 @@
         grid-area: mainimg;
         align-self: start;
         justify-self: end;
-        top: 20px;
-        right: 15px;
-        background: rgba(17,17,17,0.25);
+        top: 12px;
+        right: 12px;
+        background: rgba(17,17,17,0.45);
         color: #fff;
     }
     .detail-close-btn:hover {
