@@ -508,11 +508,6 @@ function applyFilters(){
     const background = document.getElementById('background').value;
     const tool = document.getElementById('tool') ? document.getElementById('tool').value : '';
 
-    // 검색어나 필터가 하나라도 걸려있으면 "찾는 그 컷"이 바로 보이도록
-    // variation 단위(개별)로 노출하고, 아무 조건도 없는 기본 목록에서는
-    // 같은 품번끼리 카드 1개로 묶어서 보여준다.
-    const hasActiveFilter = !!(keyword.trim() || type || usage || team || brand || gender || category || season || background || tool);
-
     /*검색 필터*/
     const result = allData.filter(item=>{
         const keywordMatch = 
@@ -536,11 +531,10 @@ function applyFilters(){
             && (!tool || item.tool === tool);
     });
 
-    if (hasActiveFilter) {
-        renderCards(result);
-    } else {
-        renderGroupedCards(result);
-    }
+    // 예전에는 검색어나 필터가 걸리면 variation 단위(개별)로 풀어서 보여줬지만,
+    // 그룹으로 묶어서 보여주는 편이 더 깔끔해서 검색/필터 여부와 상관없이
+    // 항상 그룹으로 묶어서 보여주기로 함.
+    renderGroupedCards(result);
     document.getElementById('gallery').style.display = 'grid';
     document.getElementById('resultCount').style.display = 'block';
     showEmptyPanel(); 
@@ -631,7 +625,7 @@ function updateDetailPanel(key){
                         <button type="button" id="detailDeleteBtn" style="height:28px; padding:0 10px; border:0; border-radius:6px; background:#ff3b30; color:#fff; cursor:pointer; font-size:11.5px; font-weight:600;">삭제</button>
                     </div>
                 </div>
-                <div class="panel-right-meta" id="panelMeta" style="font-size:14px; color:#999; margin-top:5px; margin-bottom:5px;"></div>
+                <div class="panel-right-meta" id="panelMeta" style="font-size:14px; color:#999; margin-top:5px;"></div>
                 <div class="info-table">
                     <div class="info-row"><strong>브랜드</strong><span id="infoBrand">${item.brand || '-'}</span></div>
                     <div class="info-row"><strong>성별</strong><span id="infoGender">${item.gender || '-'}</span></div>

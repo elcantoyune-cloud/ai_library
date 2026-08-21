@@ -470,6 +470,10 @@
             display: block;
         }
 
+        .panel-right-meta {
+            margin-bottom: 20px;
+        }
+
         .info-table {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1558,7 +1562,7 @@
     }
 
     .panel-right-header { grid-area: header; }
-    .panel-right-meta { grid-area: meta; }
+    .panel-right-meta { grid-area: meta; margin-bottom: 5px; }
     .main-image {
         grid-area: mainimg;
         margin-top: 8px;
