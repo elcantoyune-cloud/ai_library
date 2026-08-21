@@ -586,13 +586,22 @@ function renderSubImagesHTML(item) {
     `;
 }
 
+// CSS에서 상세 패널을 풀스크린 팝업으로 띄우는 조건(태블릿 이하 터치, 또는 900px 이하)과
+// 동일한 조건. 이 조건일 때만 배경 스크롤을 잠가야 하며, "포인터가 마우스냐 터치냐"만으로
+// 판단하면 데스크톱 앱 창을 좁혀서 모바일 레이아웃이 됐을 때(마우스는 여전히 pointer:fine)
+// 스크롤 잠금이 빠져서 바깥 스크롤바와 패널 안쪽 스크롤바가 겹쳐 보이는 문제가 있었다.
+function isPanelOverlayMode() {
+    return window.matchMedia('(max-width: 1320px) and (not (pointer: fine)), (max-width: 900px)').matches;
+}
+
 function updateDetailPanel(key){
     const item = window.allData.find(v => v._key === key);
     if(!item) return;
 
-    // 모바일/태블릿(터치) 팝업 오픈 시, CSS(:has) 반영을 기다리지 않고
-    // 즉시 리스트 스크롤을 막아서 리스트 스크롤바가 남아있다 사라지는 겹침 현상을 방지
-    if (!window.matchMedia('(pointer: fine)').matches) {
+    // 상세 패널이 풀스크린 팝업으로 뜨는 레이아웃일 때만 배경 스크롤을 잠근다.
+    // CSS(:has)의 반영을 기다리지 않고 즉시 잠가서 스크롤바가 남아있다 사라지는
+    // 겹침 현상을 방지.
+    if (isPanelOverlayMode()) {
         document.body.style.overflow = 'hidden';
         const listEl = document.querySelector('.container');
         if (listEl) listEl.style.overflow = 'hidden';
@@ -949,6 +958,22 @@ function copyPrompt(){
     navigator.clipboard.writeText(text);
     customAlert('프롬프트가 클립보드에 복사되었습니다.');
 }
+
+// 상세 패널이 열려 있는 상태로 창 크기가 바뀌는 경우(예: 데스크톱 앱 창을
+// 모바일 크기로 줄이는 경우)에도 오버레이 모드 진입/이탈에 맞춰 배경 스크롤
+// 잠금 상태를 다시 맞춰준다.
+window.addEventListener('resize', () => {
+    const panelOpen = !!document.querySelector('#detailPanel .panel-content');
+    if (!panelOpen) return;
+    const listEl = document.querySelector('.container');
+    if (isPanelOverlayMode()) {
+        document.body.style.overflow = 'hidden';
+        if (listEl) listEl.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+        if (listEl) listEl.style.overflow = '';
+    }
+});
 
 setTimeout(() => {
     const slider = document.querySelector('.sub-slides');
