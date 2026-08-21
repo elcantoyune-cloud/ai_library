@@ -1251,8 +1251,8 @@
     position: absolute;
     top: 25px;
     right: 25px;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border: 0;
     border-radius: 50%;
     background: rgba(17,17,17,0.06);
@@ -1565,7 +1565,7 @@
     .panel-right-meta { grid-area: meta; margin-bottom: 5px; }
     .main-image {
         grid-area: mainimg;
-        margin-top: 8px;
+        margin-top: 15px;
     }
     .detail-group-strip {
         margin-bottom: 4px;
@@ -1610,9 +1610,9 @@
         grid-area: mainimg;
         align-self: start;
         justify-self: end;
-        top: 12px;
-        right: 12px;
-        background: rgba(17,17,17,0.45);
+        top: 20px;
+        right: 15px;
+        background: rgba(17,17,17,0.20);
         color: #fff;
     }
     .detail-close-btn:hover {
