@@ -438,13 +438,23 @@ window.allData.sort((a, b) => {
         item.id = index + 1;
     });
 
-    renderGroupedCards(allData);
+    // 시즌 필터 기본값: PC 커스텀 드롭다운은 열었을 때 오늘과 가장 가까운 시즌이
+    // 하이라이트되지만, 모바일 네이티브 select는 그 기능이 없어 결과가 달랐다.
+    // 그래서 select 자체의 기본값을 미리 세팅해 PC/모바일 모두 페이지 진입 시
+    // 가장 가까운 시즌으로 동일하게 필터링되도록 통일한다.
+    const seasonSelect = document.getElementById('season');
+    if (seasonSelect && !seasonSelect.value) {
+        const nearestSeason = findNearestSeasonValue(seasonSelect);
+        if (nearestSeason) seasonSelect.value = nearestSeason;
+    }
+
     renderNewArrivals(allData);
     initNewArrivalsDrag();
     document.querySelectorAll('.filter-area select').forEach(select => {
         select.addEventListener('change', applyFilters);
     });
     enhanceFilterSelects();
+    applyFilters(); // 위에서 세팅한 기본 시즌 값을 반영해 초기 목록을 필터링해서 그린다
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('keydown', (event) => {
@@ -905,6 +915,18 @@ function renderPromptBoxHTML(item) {
 }
 // item에 따라 달라지는 부분만 채워 넣는다. updateDetailPanel(최초 오픈)과
 // switchGroupCut(같은 그룹 내 다른 컷 전환) 양쪽에서 공용으로 사용.
+// 같은 그룹의 다른 컷 대표 이미지(w_1200 상세용)를 화면엔 안 보이게 미리 받아둔다.
+// 썸네일(w_400)과 상세 이미지(w_1200)는 서로 다른 URL이라 캐시가 공유되지 않는데,
+// 썸네일 클릭 시점에야 큰 버전을 처음 요청하면 그 순간 지연이 생기기 때문에
+// 패널을 열 때 미리 백그라운드로 워밍업해서 다른 컷 전환을 빠르게 만든다.
+function preloadSiblingDetailImages(siblings, currentKey) {
+    siblings.forEach(v => {
+        if (v._key === currentKey || !v.image) return;
+        const img = new Image();
+        img.src = cldDetail(v.image);
+    });
+}
+
 function applyDetailPanelItem(item) {
     const editBtn = document.getElementById('detailEditBtn');
     const deleteBtn = document.getElementById('detailDeleteBtn');
@@ -949,6 +971,7 @@ function applyDetailPanelItem(item) {
             </div>`;
             initGroupThumbFade(prevScrollLeft);
             initGroupThumbsDrag();
+            preloadSiblingDetailImages(siblings, item._key);
         }
     }
 }
