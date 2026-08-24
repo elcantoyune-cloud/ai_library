@@ -702,6 +702,7 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
             cursor: grab;
+            -webkit-tap-highlight-color: transparent;
         }
         .detail-group-thumbs.dragging {
             cursor: grabbing;
@@ -734,6 +735,9 @@
             transition: .2s;
             -webkit-user-drag: none;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            outline: none;
         }
 
         .detail-group-thumb:hover {

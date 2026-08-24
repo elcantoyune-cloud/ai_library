@@ -258,6 +258,44 @@ function enhanceFilterSelects() {
     }
 }
 
+// ===== 모바일 네이티브 시즌 select: 열었을 때 가장 가까운 시즌이 기준점으로 보이게 =====
+// 모바일은 OS 네이티브 select라 PC 커스텀 드롭다운처럼 "선택은 안 하고 위치만 하이라이트"하는
+// 것이 불가능하다(네이티브 select는 열렸을 때 하이라이트되는 항목 = 현재 값). 그래서
+// 포커스(=열기) 시점에 값이 비어있으면 임시로 가장 가까운 시즌으로 세팅해 그 위치가 보이게 하고,
+// 사용자가 실제로 다른 값을 고르지 않은 채 닫으면(change 없이 blur) 다시 미선택 상태로 되돌린다.
+function enableMobileSeasonReference() {
+    const seasonSelect = document.getElementById('season');
+    if (!seasonSelect || seasonSelect.dataset.mobileRefBound) return;
+    seasonSelect.dataset.mobileRefBound = 'true';
+
+    let changedDuringOpen = false;
+    let wasEmptyOnOpen = false;
+
+    seasonSelect.addEventListener('focus', () => {
+        if (!isMobileLayout()) return;
+        changedDuringOpen = false;
+        wasEmptyOnOpen = !seasonSelect.value;
+        if (wasEmptyOnOpen) {
+            const nearest = findNearestSeasonValue(seasonSelect);
+            if (nearest) seasonSelect.value = nearest;
+        }
+    });
+
+    seasonSelect.addEventListener('change', () => {
+        if (!isMobileLayout()) return;
+        changedDuringOpen = true; // 사용자가 실제로 옵션을 선택함
+    });
+
+    seasonSelect.addEventListener('blur', () => {
+        if (!isMobileLayout()) return;
+        if (wasEmptyOnOpen && !changedDuringOpen) {
+            // 기준점으로만 보여준 것일 뿐 실제 선택은 아니었으므로 미선택 상태로 복귀
+            seasonSelect.value = '';
+            applyFilters();
+        }
+    });
+}
+
 async function loginUser(event) {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -448,7 +486,8 @@ window.allData.sort((a, b) => {
         select.addEventListener('change', applyFilters);
     });
     enhanceFilterSelects();
-    applyFilters(); // 위에서 세팅한 기본 시즌 값을 반영해 초기 목록을 필터링해서 그린다
+    enableMobileSeasonReference();
+    applyFilters(); // 시즌 미선택 상태이므로 전체 시즌이 필터 없이 표시된다
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('keydown', (event) => {
