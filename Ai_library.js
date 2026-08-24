@@ -438,15 +438,9 @@ window.allData.sort((a, b) => {
         item.id = index + 1;
     });
 
-    // 시즌 필터 기본값: PC 커스텀 드롭다운은 열었을 때 오늘과 가장 가까운 시즌이
-    // 하이라이트되지만, 모바일 네이티브 select는 그 기능이 없어 결과가 달랐다.
-    // 그래서 select 자체의 기본값을 미리 세팅해 PC/모바일 모두 페이지 진입 시
-    // 가장 가까운 시즌으로 동일하게 필터링되도록 통일한다.
-    const seasonSelect = document.getElementById('season');
-    if (seasonSelect && !seasonSelect.value) {
-        const nearestSeason = findNearestSeasonValue(seasonSelect);
-        if (nearestSeason) seasonSelect.value = nearestSeason;
-    }
+    // 시즌 필터 기본값은 세팅하지 않는다. 페이지 진입 시 시즌은 "미선택" 상태로
+    // 두고, 커스텀 드롭다운을 열었을 때만 오늘과 가장 가까운 시즌(예: 26 SUMMER)이
+    // 기준점으로 하이라이트/스크롤되도록 한다 (openPanel의 findNearestSeasonValue 분기).
 
     renderNewArrivals(allData);
     initNewArrivalsDrag();
