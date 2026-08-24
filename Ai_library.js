@@ -538,7 +538,7 @@ function renderNewArrivals(data) {
         return `
         <div class="na-card" onclick="updateDetailPanel('${rep._key}')">
             <div class="na-card-img-wrap">
-                <img src="${rep.image}" alt="${rep.title || ''}" draggable="false">
+                <img src="${cldThumb(rep.image)}" alt="${rep.title || ''}" draggable="false">
                 ${group.length > 1 ? `<span class="na-badge">${group.length}종</span>` : ''}
             </div>
             <div class="na-card-title">${rep.title || ''}</div>
@@ -666,7 +666,7 @@ function renderCards(data){
         const siblingCount = getGroupSiblings(item).length - 1;
         gallery.innerHTML += `
         <div class="card" id="card-${item._key}" onclick="updateDetailPanel('${item._key}')">
-            <img src="${item.image}">
+            <img src="${cldThumb(item.image)}">
             <div class="card-body">
                 <div class="card-title">${item.title}</div>
                 <div class="card-product">${item.brand} · ${item.gender} · ${item.category}<br>${item.season}</div>
@@ -703,7 +703,7 @@ function renderGroupedCards(data) {
         gallery.innerHTML += `
         <div class="card" id="card-${rep._key}" onclick="updateDetailPanel('${rep._key}')">
             <div class="card-img-wrap">
-                <img src="${rep.image}">
+                <img src="${cldThumb(rep.image)}">
                 ${group.length > 1 ? `
                 <span class="group-badge" onclick="event.stopPropagation(); toggleGroupStrip(this)">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -719,7 +719,7 @@ function renderGroupedCards(data) {
                 </div>
                 ${group.length > 1 ? `
                 <div class="group-thumb-strip">
-                    ${group.map(v => `<img class="group-thumb" src="${v.image}" onclick="event.stopPropagation(); updateDetailPanel('${v._key}')">`).join('')}
+                    ${group.map(v => `<img class="group-thumb" src="${cldThumb(v.image)}" onclick="event.stopPropagation(); updateDetailPanel('${v._key}')">`).join('')}
                 </div>` : ''}
             </div>
         </div>
@@ -803,7 +803,7 @@ function renderSubImagesHTML(item) {
         <div class="sub-image-wrapper" id="subSliderWrapper" style="width: ${imgList.length * 100}%;">
             ${imgList.map(src => `
                 <div class="sub-slide-item" style="width: ${100 / imgList.length}%;">
-                    <img src="${src}" alt="sub-image" draggable="false">
+                    <img src="${cldDetail(src)}" alt="sub-image" draggable="false">
                 </div>
             `).join('')}
         </div>
@@ -851,7 +851,7 @@ function updateDetailPanel(key){
             <button type="button" class="detail-close-btn" onclick="showEmptyPanel()" aria-label="닫기">&times;</button>
             <div class="panel-left">
                 <div class="image-wrap">
-                    <img src="${item.image}" class="main-image" id="mainImage">
+                    <img src="${cldDetail(item.image)}" class="main-image" id="mainImage">
 
                     ${renderSubImagesHTML(item)}
                 </div>
@@ -942,7 +942,7 @@ function applyDetailPanelItem(item) {
                 <div class="detail-group-label">같은 제품 · 다른 컷 (${siblings.length})</div>
                 <div class="detail-group-thumbs-wrap">
                     <div class="detail-group-thumbs" id="groupThumbs" onscroll="updateGroupThumbFade(this)">
-                        ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${v.image}" data-key="${v._key}" draggable="false" onclick="switchGroupCut('${v._key}')">`).join('')}
+                        ${siblings.map(v => `<img class="detail-group-thumb ${v._key === item._key ? 'active' : ''}" src="${cldThumb(v.image)}" data-key="${v._key}" draggable="false" onclick="switchGroupCut('${v._key}')">`).join('')}
                     </div>
                     <div class="group-thumbs-fade" id="groupThumbsFade"></div>
                 </div>
@@ -978,7 +978,7 @@ function switchGroupCut(key) {
     if (targetCard) targetCard.classList.add('selected');
 
     const mainImg = document.getElementById('mainImage');
-    if (mainImg) mainImg.src = item.image;
+    if (mainImg) mainImg.src = cldDetail(item.image);
 
     const titleEl = document.getElementById('panelTitle');
     if (titleEl) titleEl.textContent = item.title;
@@ -1293,7 +1293,7 @@ function renderSubPreviewList() {
     const items = window.currentSubItems;
 
     container.innerHTML = items.map((it, idx) => {
-        const src = it.type === 'existing' ? it.url : it.previewUrl;
+        const src = it.type === 'existing' ? cldThumb(it.url) : it.previewUrl;
         return `
         <div class="sub-preview-item">
             <span class="sub-preview-num">${idx + 1}</span>
@@ -1353,7 +1353,7 @@ function renderMainPreviewList() {
     container.style.display = 'flex';
 
     container.innerHTML = items.map((it, idx) => {
-        const src = it.type === 'existing' ? it.url : it.previewUrl;
+        const src = it.type === 'existing' ? cldThumb(it.url) : it.previewUrl;
         return `
         <div class="main-preview-item">
             <div class="main-preview-thumb">
@@ -1578,6 +1578,28 @@ function compressImageIfNeeded(file, maxDimension = 900, quality = 0.6, threshol
 
         img.src = objectUrl;
     });
+}
+
+// Cloudinary URL에 리사이즈/자동 최적화 변환 파라미터를 삽입해서
+// 필요한 만큼만 이미지를 내려받게 한다 (원본 파일 자체는 그대로 보존, 표시할 때만 가볍게).
+// Cloudinary URL이 아니거나(blob: 미리보기 등) 형식이 다르면 원본 그대로 반환한다.
+function cldUrl(url, transform) {
+    if (!url || typeof url !== 'string') return url;
+    const marker = '/image/upload/';
+    const idx = url.indexOf(marker);
+    if (idx === -1) return url;
+    const insertAt = idx + marker.length;
+    return url.slice(0, insertAt) + transform + '/' + url.slice(insertAt);
+}
+
+// 그리드 카드/썸네일용 - 정사각형으로 작게, 자동 포맷(webp/avif)·자동 품질
+function cldThumb(url) {
+    return cldUrl(url, 'w_400,h_400,c_fill,q_auto,f_auto');
+}
+
+// 상세 패널 큰 이미지용 - 화면에 필요한 만큼(최대 1200px)으로만 제한, 자동 포맷·품질
+function cldDetail(url) {
+    return cldUrl(url, 'w_1200,c_limit,q_auto,f_auto');
 }
 
 // 파일 하나를 Cloudinary에 업로드하고 이미지 URL을 반환
@@ -1961,7 +1983,7 @@ function renderDashboardTable() {
 
     tbody.innerHTML = rows.map(({ item, date, count }) => `
         <tr class="dash-row" onclick="handleDashboardRowClick('${item._key}')">
-            <td><img class="dash-thumb" src="${item.image || ''}" onerror="this.style.visibility='hidden'"></td>
+            <td><img class="dash-thumb" src="${item.image ? cldThumb(item.image) : ''}" onerror="this.style.visibility='hidden'"></td>
             <td>${item.title || '-'}${count > 1 ? ` <span class="dash-count-badge">${count}종</span>` : ''}</td>
             <td>${item.brand || '-'}</td>
             <td>${item.season || '-'}</td>
