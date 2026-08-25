@@ -35,7 +35,7 @@
             display: flex;
             max-width: 1600px;
             width: 100%;  
-            height: 100vh; 
+            height: 100vh; url(../로그인추가/index.html) url(../로그인추가/Ai_library.css) url(../로그인추가/Ai_library.js)
             overflow-x: auto; 
             overflow-y: hidden;
             scroll-behavior: smooth;
@@ -717,7 +717,6 @@
             right: 0;
             bottom: 0;
             width: 56px;
-            background: linear-gradient(to right, rgba(255,255,255,0), #fff);
             pointer-events: none;
             opacity: 0;
             transition: opacity .2s;
