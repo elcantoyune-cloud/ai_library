@@ -878,6 +878,9 @@ function updateDetailPanel(key){
     // CSS(:has)의 반영을 기다리지 않고 즉시 잠가서 스크롤바가 남아있다 사라지는
     // 겹침 현상을 방지.
     if (isPanelOverlayMode()) {
+        // body만 잠그면 iOS 사파리에서 html(문서 자체)이 여전히 스크롤 가능해서
+        // 상세 패널 스크롤바 + 배경 스크롤바가 겹쳐 보이는 문제가 있어 html도 함께 잠근다.
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
         const listEl = document.querySelector('.container');
         if (listEl) listEl.style.overflow = 'hidden';
@@ -1237,6 +1240,7 @@ function showEmptyPanel() {
     document.getElementById('detailPanel').innerHTML = `
         <div class="empty-panel">왼쪽 리스트에서 카드를 클릭하면 상세 정보가 나타납니다.</div>
     `;
+    document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
     const listEl = document.querySelector('.container');
     if (listEl) listEl.style.overflow = '';
@@ -1256,9 +1260,11 @@ window.addEventListener('resize', () => {
     if (!panelOpen) return;
     const listEl = document.querySelector('.container');
     if (isPanelOverlayMode()) {
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
         if (listEl) listEl.style.overflow = 'hidden';
     } else {
+        document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
         if (listEl) listEl.style.overflow = '';
     }

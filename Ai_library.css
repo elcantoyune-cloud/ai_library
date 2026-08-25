@@ -1652,6 +1652,11 @@
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .detail-panel::-webkit-scrollbar {
+        display: none;
     }
 
     /* 상세 내용(.panel-content)이 들어있을 때만 팝업을 보여줌 */
@@ -1711,7 +1716,7 @@
     .panel-right-meta { grid-area: meta; margin-bottom: 5px; }
     .main-image {
         grid-area: mainimg;
-        margin-top: 15px;
+        margin-top: 10px;
     }
     .detail-group-strip {
         margin-bottom: 4px;
@@ -1746,7 +1751,7 @@
     .info-table {
         grid-area: info;
         overflow: visible;
-        margin-top: 30px;
+        margin-top: 22px;
     }
     .prompt-box { grid-area: prompt; margin-top: 20px; }
 
