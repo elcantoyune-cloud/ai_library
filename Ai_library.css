@@ -1746,11 +1746,10 @@
     .info-table {
         grid-area: info;
         overflow: visible;
+        margin-top: 20px;
     }
-    .prompt-box { grid-area: prompt; margin-top: 10px; margin-bottom:20px;}
+    .prompt-box { grid-area: prompt; margin-top: 10px; }
 
-    /* 제목이 길면 헤더 옆 X 버튼과 겹치므로, 모바일에서는 패널 상단이 아니라
-       메인 이미지 우측 상단 위에 떠 있도록 위치를 옮긴다. */
     .detail-close-btn {
         display: flex;
         grid-area: mainimg;
@@ -1765,7 +1764,6 @@
         background: rgba(17,17,17,0.6);
     }
 
-    /* 등록/수정 모달 - 전체화면이 아니라 여백을 둔 팝업(카드) 형태 유지, 화면 폭만 안 넘치게 조정 */
     #registerModal {
         padding: 16px;
     }
@@ -1777,7 +1775,7 @@
         overflow-x: hidden;
     }
 
-    /* 등록 현황: 모바일/태블릿에서는 지금처럼 팝업이 아니라 전체화면 페이지로 표시 */
+
     .dashboard-overlay {
         display: none;
         position: fixed;
