@@ -2263,3 +2263,4 @@ function closeDashboard() {
     const overlay = document.getElementById('dashboardOverlay');
     if (overlay) overlay.classList.remove('open');
 }
+
