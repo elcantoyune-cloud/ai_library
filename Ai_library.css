@@ -836,30 +836,32 @@
             -webkit-user-drag: none; 
         }
 
-        .sub-slider-bullets {
+        /* 서브 이미지 슬라이드바 (불렛 대체) */
+        .sub-slider-bar {
             position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 14px;
+            right: 14px;
+            bottom: 6px;
+            height: 18px;              /* 누르기 쉬운 영역 */
             display: flex;
-            gap: 5px;
+            align-items: center;
             z-index: 10;
-            pointer-events: none; 
-        }
-
-        .sub-slider-bullets .sub-bullet {
-            width: 8px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50px;
-            pointer-events: auto; 
             cursor: pointer;
-            transition: all 0.3s ease;
         }
-
-        .sub-slider-bullets .sub-bullet.active {
-            background: #0066ff;
-            width: 8px;
+        .sub-slider-bar-track {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.28);
+            overflow: hidden;
+        }
+        .sub-slider-bar-thumb {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-radius: 999px;
+            background: #fff;
         }
 ㅍ
 /* ===== 등록 버튼 ===== */
@@ -1714,9 +1716,10 @@
 
     .panel-right-header { grid-area: header; }
     .panel-right-meta { grid-area: meta; margin-bottom: 5px; }
-    .main-image {
+    .main-image-stage {
         grid-area: mainimg;
         margin-top: 10px;
+        min-width: 0;
     }
     .detail-group-strip {
         margin-bottom: 4px;
@@ -2076,4 +2079,55 @@
     .dashboard-scroll {
         padding: 0 16px 24px;
     }
+}
+
+/* ===== 메인 이미지: 좌우 넘김 버튼 + "1 / 20" 표시 ===== */
+.main-image-stage {
+    position: relative;
+}
+.main-image-stage .main-image {
+    display: block;
+}
+.main-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(17, 17, 17, 0.45);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 5;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s ease, opacity .15s ease;
+}
+.main-nav-btn.prev { left: 10px; }
+.main-nav-btn.next { right: 10px; }
+.main-nav-btn:hover { background: rgba(17, 17, 17, 0.75); }
+.main-nav-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+    pointer-events: none;
+}
+.main-image-counter {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: rgba(17, 17, 17, 0.6);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+    z-index: 5;
 }

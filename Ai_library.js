@@ -852,10 +852,10 @@ function renderSubImagesHTML(item) {
         </div>
 
         ${imgList.length > 1 ? `
-        <div class="sub-slider-bullets" id="subSliderBullets">
-            ${imgList.map((_, idx) => `
-                <span class="sub-bullet ${idx === 0 ? 'active' : ''}" onclick="moveSubSlide(${idx})"></span>
-            `).join('')}
+        <div class="sub-slider-bar" id="subSliderBar" data-count="${imgList.length}" onclick="onSubBarClick(event)">
+            <div class="sub-slider-bar-track">
+                <div class="sub-slider-bar-thumb" id="subSliderBarThumb" style="width:${100 / imgList.length}%; left:0%;"></div>
+            </div>
         </div>
         ` : ''}
     </div>
@@ -897,7 +897,16 @@ function updateDetailPanel(key){
             <button type="button" class="detail-close-btn" onclick="showEmptyPanel()" aria-label="닫기">&times;</button>
             <div class="panel-left">
                 <div class="image-wrap">
-                    <img src="${cldDetail(item.image)}" class="main-image" id="mainImage">
+                    <div class="main-image-stage" id="mainImageStage">
+                        <img src="${cldDetail(item.image)}" data-src="${cldDetail(item.image)}" class="main-image" id="mainImage">
+                        <button type="button" class="main-nav-btn prev" id="mainNavPrev" aria-label="이전 컷" onpointerdown="event.stopPropagation()" onclick="goGroupCut(-1)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <button type="button" class="main-nav-btn next" id="mainNavNext" aria-label="다음 컷" onpointerdown="event.stopPropagation()" onclick="goGroupCut(1)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                        <div class="main-image-counter" id="mainImageCounter"></div>
+                    </div>
 
                     ${renderSubImagesHTML(item)}
                 </div>
@@ -968,6 +977,7 @@ function applyDetailPanelItem(item) {
     window.currentDetailKey = item._key;
     const swipeImg = document.getElementById('mainImage');
     if (swipeImg) swipeImg.style.cursor = getGroupSiblings(item).length > 1 ? 'grab' : '';
+    updateMainImageNav(item);
     const editBtn = document.getElementById('detailEditBtn');
     const deleteBtn = document.getElementById('detailDeleteBtn');
     if (editBtn) editBtn.style.display = item.firebaseId ? '' : 'none';
@@ -993,6 +1003,20 @@ function applyDetailPanelItem(item) {
             groupStripArea.innerHTML = '';
         } else {
             const siblings = getGroupSiblings(item);
+
+            // 같은 그룹 안에서 컷만 바뀐 경우엔 썸네일을 다시 그리지 않고 active 표시만 옮긴다.
+            // (매번 innerHTML로 새로 그리면 썸네일 이미지가 다시 로드되면서 하얗게 깜빡임)
+            const existingThumbs = document.getElementById('groupThumbs');
+            if (existingThumbs) {
+                const thumbEls = Array.from(existingThumbs.querySelectorAll('.detail-group-thumb'));
+                const sameSet = thumbEls.length === siblings.length &&
+                    thumbEls.every((t, i) => t.dataset.key === siblings[i]._key);
+                if (sameSet) {
+                    thumbEls.forEach(t => t.classList.toggle('active', t.dataset.key === item._key));
+                    return;
+                }
+            }
+
             // 썸네일 목록을 다시 그리기 전에 기존 스크롤 위치를 저장해뒀다가
             // 다시 그린 뒤 그대로 복원한다. (활성 썸네일을 강제로 화면에 끌어오면
             // 오른쪽 끝까지 넘긴 상태에서 중간 썸네일을 눌렀을 때 그 썸네일이
@@ -1041,7 +1065,7 @@ function switchGroupCut(key) {
     if (targetCard) targetCard.classList.add('selected');
 
     const mainImg = document.getElementById('mainImage');
-    if (mainImg) mainImg.src = cldDetail(item.image);
+    if (mainImg) swapMainImage(mainImg, cldDetail(item.image));
 
     const titleEl = document.getElementById('panelTitle');
     if (titleEl) titleEl.textContent = item.title;
@@ -1093,6 +1117,34 @@ function switchGroupCut(key) {
    - 터치 스와이프 / 마우스 드래그 / 트랙패드 가로 스크롤 / 키보드 ← →
    - 끝 컷에서는 더 넘어가지 않고 살짝 튕기기만 함
 --------------------------------------------------- */
+// 새 이미지를 백그라운드에서 먼저 받아 디코딩한 뒤에 교체한다.
+// (src를 바로 바꾸면 새 이미지가 그려지기 전까지 배경이 비쳐서 하얗게 깜빡임)
+function swapMainImage(img, url) {
+    if ((img.dataset.src || img.getAttribute('src')) === url) return;
+    img.dataset.src = url;
+    const pre = new Image();
+    const apply = () => { if (img.dataset.src === url) img.src = url; };
+    pre.src = url;
+    if (pre.decode) pre.decode().then(apply).catch(apply);
+    else pre.onload = pre.onerror = apply;
+}
+
+// 큰 이미지 위 좌우 버튼 / "1 / 20" 표시 갱신 (다른 컷이 없으면 전부 숨김)
+function updateMainImageNav(item) {
+    const siblings = getGroupSiblings(item);
+    const idx = siblings.findIndex(v => v._key === item._key);
+    const multi = siblings.length > 1;
+    const prev = document.getElementById('mainNavPrev');
+    const next = document.getElementById('mainNavNext');
+    const counter = document.getElementById('mainImageCounter');
+    if (prev) { prev.style.display = multi ? '' : 'none'; prev.disabled = idx <= 0; }
+    if (next) { next.style.display = multi ? '' : 'none'; next.disabled = idx >= siblings.length - 1; }
+    if (counter) {
+        counter.style.display = multi ? '' : 'none';
+        counter.textContent = `${idx + 1} / ${siblings.length}`;
+    }
+}
+
 function goGroupCut(dir) {
     const cur = window.allData.find(v => v._key === window.currentDetailKey);
     if (!cur) return false;
@@ -1158,14 +1210,9 @@ function initMainImageSwipe() {
         img.style.cursor = 'grab';
 
         if (Math.abs(dx) > threshold && goGroupCut(dx < 0 ? 1 : -1)) {
-            // 새 컷이 반대편에서 살짝 밀려 들어오는 느낌
+            // 컷이 바뀌었으면 위치만 즉시 원위치 (깜빡임 없이 이미지만 교체됨)
             img.style.transition = 'none';
-            img.style.transform = `translateX(${dx < 0 ? 40 : -40}px)`;
-            img.style.opacity = '0.5';
-            void img.offsetWidth;
-            img.style.transition = 'transform .2s ease, opacity .2s ease';
             img.style.transform = '';
-            img.style.opacity = '';
         } else {
             img.style.transition = 'transform .2s ease';
             img.style.transform = '';
@@ -1286,27 +1333,39 @@ window.currentSubIndex = 0;
 
 function moveSubSlide(index) {
     const wrapper = document.getElementById('subSliderWrapper');
-    const bullets = document.querySelectorAll('#subSliderBullets .sub-bullet');
     if (!wrapper) return;
 
     window.currentSubIndex = index;
-    const totalSlides = bullets.length || 1;
+    const totalSlides = wrapper.querySelectorAll('.sub-slide-item').length || 1;
     const moveX = index * (100 / totalSlides);
 
     wrapper.style.transition = "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
     wrapper.style.transform = `translateX(-${moveX}%)`;
 
-    bullets.forEach((bullet, idx) => {
-        if (idx === index) bullet.classList.add('active');
-        else bullet.classList.remove('active');
-    });
+    const thumb = document.getElementById('subSliderBarThumb');
+    if (thumb) {
+        thumb.style.transition = 'left 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+        thumb.style.left = `${index * (100 / totalSlides)}%`;
+    }
+}
+
+// 슬라이드바(트랙)를 클릭하면 그 위치의 서브 이미지로 이동
+function onSubBarClick(e) {
+    const bar = document.getElementById('subSliderBar');
+    if (!bar) return;
+    const total = parseInt(bar.dataset.count, 10) || 1;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 0.9999);
+    moveSubSlide(Math.floor(ratio * total));
 }
 
 function initSubSlider() {
     const container = document.getElementById('subImageContainer');
     const wrapper = document.getElementById('subSliderWrapper');
-    const bullets = document.querySelectorAll('#subSliderBullets .sub-bullet');
-    if (!container || !wrapper || bullets.length <= 1) return;
+    const slideCount = wrapper ? wrapper.querySelectorAll('.sub-slide-item').length : 0;
+    // 새로 그려진 서브 슬라이더는 항상 첫 장부터 시작하므로 인덱스도 함께 초기화
+    window.currentSubIndex = 0;
+    if (!container || !wrapper || slideCount <= 1) return;
 
     let isDragging = false;
     let startX = 0;
@@ -1314,8 +1373,8 @@ function initSubSlider() {
     let prevTranslate = 0;
 
     container.addEventListener('pointerdown', (e) => {
-        // 불렛(점)을 터치했을 때는 드래그 로직이 개입하지 않도록 제외 (불렛 자체 클릭으로 전환 처리)
-        if (e.target.closest('.sub-slider-bullets')) return;
+        // 슬라이드바를 눌렀을 때는 드래그 로직이 개입하지 않도록 제외 (바 자체 클릭으로 전환 처리)
+        if (e.target.closest('.sub-slider-bar')) return;
 
         isDragging = true;
         startX = e.clientX;
@@ -1331,6 +1390,14 @@ function initSubSlider() {
         const dragDistance = currentX - startX;
         currentTranslate = prevTranslate + dragDistance;
         wrapper.style.transform = `translateX(${currentTranslate}px)`;
+
+        const barThumb = document.getElementById('subSliderBarThumb');
+        if (barThumb) {
+            const maxTranslate = container.offsetWidth * (slideCount - 1);
+            const clamped = Math.min(Math.max(-currentTranslate, 0), maxTranslate);
+            barThumb.style.transition = 'none';
+            barThumb.style.left = `${(clamped / container.offsetWidth) * (100 / slideCount)}%`;
+        }
     });
 
     const handlePointerUp = (e) => {
@@ -1340,7 +1407,7 @@ function initSubSlider() {
         const movedBy = e.clientX - startX;
         const triggerDistance = container.offsetWidth * 0.2; 
 
-        if (movedBy < -triggerDistance && window.currentSubIndex < bullets.length - 1) {
+        if (movedBy < -triggerDistance && window.currentSubIndex < slideCount - 1) {
             window.currentSubIndex += 1; 
         } else if (movedBy > triggerDistance && window.currentSubIndex > 0) {
             window.currentSubIndex -= 1; 
