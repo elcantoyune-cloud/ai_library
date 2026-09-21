@@ -836,30 +836,32 @@
             -webkit-user-drag: none; 
         }
 
-        .sub-slider-bullets {
+        /* 서브 이미지 슬라이드바 (불렛 대체) */
+        .sub-slider-bar {
             position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 14px;
+            right: 14px;
+            bottom: 6px;
+            height: 18px;            
             display: flex;
-            gap: 5px;
+            align-items: center;
             z-index: 10;
-            pointer-events: none; 
-        }
-
-        .sub-slider-bullets .sub-bullet {
-            width: 8px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50px;
-            pointer-events: auto; 
             cursor: pointer;
-            transition: all 0.3s ease;
         }
-
-        .sub-slider-bullets .sub-bullet.active {
-            background: #0066ff;
-            width: 8px;
+        .sub-slider-bar-track {
+            position: relative;
+            width: 100%;
+            height: 3px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.28);
+            overflow: hidden;
+        }
+        .sub-slider-bar-thumb {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-radius: 999px;
+            background: #fff;
         }
 ㅍ
 /* ===== 등록 버튼 ===== */
@@ -1714,9 +1716,10 @@
 
     .panel-right-header { grid-area: header; }
     .panel-right-meta { grid-area: meta; margin-bottom: 5px; }
-    .main-image {
+    .main-image-stage {
         grid-area: mainimg;
         margin-top: 10px;
+        min-width: 0;
     }
     .detail-group-strip {
         margin-bottom: 4px;
@@ -2076,4 +2079,91 @@
     .dashboard-scroll {
         padding: 0 16px 24px;
     }
+}
+
+/* ===== 메인 이미지: 좌우 넘김 버튼 + "1 / 20" 표시 ===== */
+.main-image-stage {
+    position: relative;
+}
+.main-image-stage .main-image {
+    display: block;
+}
+.main-image-counter {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: rgba(17, 17, 17, 0.6);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* ===== 메인 이미지 하단: 같은 제품 다른 컷 스트립 (양옆 이동 버튼 포함) ===== */
+.main-image-stage #groupStripArea {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    margin: 0;
+    min-width: 0;
+    z-index: 6;
+}
+.main-image-stage #groupStripArea:empty { display: none; }
+.main-image-stage .detail-group-strip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 6px;
+    border-radius: 14px;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+.main-image-stage .detail-group-thumbs-wrap {
+    flex: 1;
+    min-width: 0;
+}
+.main-image-stage .group-thumbs-fade { display: none; }
+.main-image-stage .detail-group-thumbs { gap: 6px; }
+.main-image-stage .detail-group-thumb {
+    width: 46px;
+    height: 46px;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    box-shadow: none;
+    opacity: 0.6;
+}
+.main-image-stage .detail-group-thumb:hover { opacity: 0.9; }
+.main-image-stage .detail-group-thumb.active {
+    border-color: none;
+    opacity: 1;
+}
+.group-strip-btn {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 50%;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s ease, opacity .15s ease;
+}
+.group-strip-btn:hover { background: rgba(255, 255, 255, 0.35); }
+.group-strip-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
 }
