@@ -936,6 +936,7 @@ function updateDetailPanel(key){
 
     updateMediaSplitClass(item);
     initSubSlider();
+    initMainImageSwipe();
     applyDetailPanelItem(item);
 }
 
@@ -964,6 +965,9 @@ function preloadSiblingDetailImages(siblings, currentKey) {
 }
 
 function applyDetailPanelItem(item) {
+    window.currentDetailKey = item._key;
+    const swipeImg = document.getElementById('mainImage');
+    if (swipeImg) swipeImg.style.cursor = getGroupSiblings(item).length > 1 ? 'grab' : '';
     const editBtn = document.getElementById('detailEditBtn');
     const deleteBtn = document.getElementById('detailDeleteBtn');
     if (editBtn) editBtn.style.display = item.firebaseId ? '' : 'none';
@@ -1081,6 +1085,122 @@ function switchGroupCut(key) {
     initSubSlider();
 
     applyDetailPanelItem(item);
+}
+
+/* ---------------------------------------------------
+   메인(큰) 이미지 좌우 넘기기 - 같은 제품의 다른 컷 이동
+   - 같은 제품 · 다른 컷이 2개 이상일 때만 동작
+   - 터치 스와이프 / 마우스 드래그 / 트랙패드 가로 스크롤 / 키보드 ← →
+   - 끝 컷에서는 더 넘어가지 않고 살짝 튕기기만 함
+--------------------------------------------------- */
+function goGroupCut(dir) {
+    const cur = window.allData.find(v => v._key === window.currentDetailKey);
+    if (!cur) return false;
+    const siblings = getGroupSiblings(cur);
+    const idx = siblings.findIndex(v => v._key === cur._key);
+    const target = siblings[idx + dir];
+    if (!target) return false;
+    switchGroupCut(target._key);
+    // 넘긴 컷의 썸네일이 목록 밖에 있으면 보이는 곳까지만 살짝 스크롤
+    const activeThumb = document.querySelector('#groupThumbs .detail-group-thumb.active');
+    if (activeThumb) activeThumb.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    return true;
+}
+
+function initMainImageSwipe() {
+    const img = document.getElementById('mainImage');
+    if (!img) return;
+    img.draggable = false;
+    img.style.touchAction = 'pan-y';   // 세로 스크롤은 유지, 가로 제스처는 이쪽에서 처리
+    img.style.userSelect = 'none';
+
+    let startX = 0, startY = 0, dragging = false, active = false, pid = null;
+
+    const currentIndexInfo = () => {
+        const cur = window.allData.find(v => v._key === window.currentDetailKey);
+        if (!cur) return { idx: 0, len: 1 };
+        const siblings = getGroupSiblings(cur);
+        return { idx: siblings.findIndex(v => v._key === cur._key), len: siblings.length };
+    };
+
+    img.addEventListener('pointerdown', (e) => {
+        if (currentIndexInfo().len <= 1) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        // 바깥 mainWrapper의 드래그 스크롤이 이 제스처를 가로채지 않도록 차단
+        e.stopPropagation();
+        active = true; dragging = false; pid = e.pointerId;
+        startX = e.clientX; startY = e.clientY;
+    });
+
+    img.addEventListener('pointermove', (e) => {
+        if (!active || e.pointerId !== pid) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!dragging) {
+            if (Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(dy)) return;
+            dragging = true;
+            try { img.setPointerCapture(pid); } catch (_) {}
+            img.style.transition = 'none';
+            img.style.cursor = 'grabbing';
+        }
+        const { idx, len } = currentIndexInfo();
+        const atEdge = (idx === 0 && dx > 0) || (idx === len - 1 && dx < 0);
+        img.style.transform = `translateX(${atEdge ? dx * 0.25 : dx}px)`;
+    });
+
+    const finish = (e) => {
+        if (!active || (e && e.pointerId !== pid)) return;
+        active = false;
+        if (!dragging) return;
+        dragging = false;
+        const dx = e ? e.clientX - startX : 0;
+        const threshold = Math.max(50, img.clientWidth * 0.15);
+        img.style.cursor = 'grab';
+
+        if (Math.abs(dx) > threshold && goGroupCut(dx < 0 ? 1 : -1)) {
+            // 새 컷이 반대편에서 살짝 밀려 들어오는 느낌
+            img.style.transition = 'none';
+            img.style.transform = `translateX(${dx < 0 ? 40 : -40}px)`;
+            img.style.opacity = '0.5';
+            void img.offsetWidth;
+            img.style.transition = 'transform .2s ease, opacity .2s ease';
+            img.style.transform = '';
+            img.style.opacity = '';
+        } else {
+            img.style.transition = 'transform .2s ease';
+            img.style.transform = '';
+        }
+        setTimeout(() => { img.style.transition = ''; }, 250);
+    };
+    img.addEventListener('pointerup', finish);
+    img.addEventListener('pointercancel', finish);
+
+    // 트랙패드/마우스 가로 스크롤(두 손가락 좌우 스와이프)
+    let wheelLock = false;
+    img.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 8) return;
+        if (currentIndexInfo().len <= 1) return;
+        e.preventDefault();               // 브라우저 뒤로가기 제스처 방지
+        if (wheelLock) return;
+        wheelLock = true;
+        goGroupCut(e.deltaX > 0 ? 1 : -1);
+        setTimeout(() => { wheelLock = false; }, 450);
+    }, { passive: false });
+}
+
+// 키보드 ← → 로도 같은 제품의 다른 컷 이동 (입력창/모달이 열려 있을 땐 무시)
+if (!window._groupCutKeyBound) {
+    window._groupCutKeyBound = true;
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+        if (!document.querySelector('#detailPanel .panel-content')) return;
+        const t = e.target;
+        if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+        const modalOpen = Array.from(document.querySelectorAll('.modal-overlay')).some(m => m.offsetParent !== null);
+        if (modalOpen) return;
+        if (goGroupCut(e.key === 'ArrowRight' ? 1 : -1)) e.preventDefault();
+    });
 }
 
 // 다른 컷 썸네일 목록: 오른쪽으로 더 스크롤할 내용이 있을 때만 페이드 힌트 표시
