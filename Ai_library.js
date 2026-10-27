@@ -47,12 +47,14 @@ function findNearestSeasonValue(select) {
     const termRank = { SPRING: 1, SUMMER: 2, AUTUMN: 3, WINTER: 4 };
     const now = new Date();
     const month = now.getMonth() + 1;
-    const year = now.getFullYear() % 100;
+    let year = now.getFullYear() % 100;
     let currentTerm;
     if (month >= 3 && month <= 5) currentTerm = 'SPRING';
     else if (month >= 6 && month <= 8) currentTerm = 'SUMMER';
-    else if (month >= 9 && month <= 11) currentTerm = 'AUTUMN';
-    else currentTerm = 'WINTER';
+    else if (month === 9) currentTerm = 'AUTUMN';
+    else currentTerm = 'WINTER'; // 10~12월 + 1~2월
+    // 1~2월은 전년도 WINTER 시즌에 속한다 (예: 2027년 1월 → 26 WINTER)
+    if (month <= 2) year -= 1;
     const currentScore = year * 10 + termRank[currentTerm];
 
     let best = null;
@@ -2263,4 +2265,3 @@ function closeDashboard() {
     const overlay = document.getElementById('dashboardOverlay');
     if (overlay) overlay.classList.remove('open');
 }
-
